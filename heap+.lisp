@@ -6,6 +6,7 @@
 ;;;; should not use HEAP and HEAP+ interchangeably.
 ;;;;
 ;;;; Copyright (c) Jeffrey Massung
+;;;; Some modifications: Léo Paviet Salomon, 2021-2022
 ;;;;
 ;;;; This file is provided to you under the Apache License,
 ;;;; Version 2.0 (the "License"); you may not use this file
@@ -22,26 +23,7 @@
 ;;;; under the License.
 ;;;;
 
-(defpackage :heap+
-  (:use :cl)
-  (:export
-   #:make-heap
-
-   ;; push/pop elements on/off the heap
-   #:heap-push
-   #:heap-pop
-
-   ;; peek at the top element of the heap
-   #:heap-peek
-
-   ;; update key of some element
-   #:heap-update
-
-   ;; remove all and copy elements of the heap
-   #:heap-flush
-   #:heap-contents))
-
-(in-package :heap+)
+(in-package #:org.numbra.perso)
 
 ;;; ----------------------------------------------------
 

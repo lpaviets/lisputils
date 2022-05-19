@@ -72,7 +72,3 @@ Each line <line> is read a the s-expr (<line>)"
 
 (defun coma-separated-int-line (line)
   (mapcar 'parse-integer (ppcre:split " *, *" line)))
-
-(defun parse-digit (char)
-  (and (char<= #\0 char #\9)
-       (- (char-int char) (char-int #\0))))

@@ -13,7 +13,6 @@
    ;; Small parsing utils
    #:coma-separated-int-line
    #:split-word-int
-   #:parse-digit
    ;; Generic utilities
    #:neighbours
    #:flip
@@ -29,7 +28,22 @@
    #:shortest-path-dec-key
    #:a-star
    #:dfs
+   ;; Data structures:
+   ;; - Heap
+   #:make-heap
+   #:heap-push
+   #:heap-pop
+   #:heap-peek
+   #:heap-update
+   #:heap-flush
+   #:heap-contents
+   ;; - Hash tables
+   #:ht-count-if
+   #:ht-count
    ;; Macros
    #:do-array
    #:do-line
-   #:whereas))
+   #:whereas
+   ;; Printing
+   #:print-array
+   #:print-hash))

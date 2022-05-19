@@ -84,12 +84,12 @@ where the ui's are exactly the vertices adjacent to SOURCE."
              (or (gethash x distance)
                  most-positive-fixnum)))
       (loop
-        :with queue = (heap+:make-heap #'< :key #'get-dist)
+        :with queue = (make-heap #'< :key #'get-dist)
         :initially
            (setf (gethash source distance) 0)
-           (heap+:heap-push source queue)
-        :while (heap+:heap-peek queue)
-        :for vertex = (heap+:heap-pop queue)
+           (heap-push source queue)
+        :while (heap-peek queue)
+        :for vertex = (heap-pop queue)
         :for curr-dist = (get-dist vertex)
 
         :do (loop :for edge :in (funcall edges vertex)
@@ -98,7 +98,7 @@ where the ui's are exactly the vertices adjacent to SOURCE."
                   :when (< other-new-dist (get-dist other))
                     :do
                        (setf (gethash other distance) other-new-dist)
-                       (heap+:heap-push other queue)
+                       (heap-push other queue)
                        (setf (gethash other parent) vertex))
         :until (funcall test vertex target)
         :finally (hash-table-count distance)
@@ -124,12 +124,12 @@ See `shortest-path-dec-key' for the other arguments."
                    (+ dist (funcall heuristic x))
                    most-positive-fixnum))))
       (loop
-        :with queue = (heap+:make-heap #'< :key #'get-dist)
+        :with queue = (make-heap #'< :key #'get-dist)
         :initially
            (setf (gethash source distance) 0)
-           (heap+:heap-push source queue)
-        :while (heap+:heap-peek queue)
-        :for vertex = (heap+:heap-pop queue)
+           (heap-push source queue)
+        :while (heap-peek queue)
+        :for vertex = (heap-pop queue)
         :for curr-dist = (get-dist vertex)
 
         :do (loop :for edge :in (funcall edges vertex)
@@ -138,7 +138,7 @@ See `shortest-path-dec-key' for the other arguments."
                   :when (< other-new-dist (get-dist other))
                     :do
                        (setf (gethash other distance) other-new-dist)
-                       (heap+:heap-push other queue)
+                       (heap-push other queue)
                        (setf (gethash other parent) vertex))
         :until (funcall test vertex target)
         :finally (hash-table-count distance)

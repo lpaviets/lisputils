@@ -11,5 +11,7 @@
                (:file "heap+")
                (:file "utilities")
                (:file "macros")
+               (:file "hash-table")
                (:file "algorithms")
-               (:file "parsing")))
+               (:file "parsing")
+               (:file "printing")))
