@@ -29,6 +29,11 @@
    #:a-star
    #:dfs
    ;; Data structures:
+   ;; - Points
+   #:point
+   #:add-point
+   #:sub-point
+   #:with-point
    ;; - Heap
    #:make-heap
    #:heap-push
@@ -40,7 +45,18 @@
    ;; - Hash tables
    #:ht-count-if
    #:ht-count
+   ;; Quad-trees
+   #:make-box
+   #:make-bounding-box
+   #:qtree-insert
+   #:make-qtree-from-list
+   #:with-box-sides
+   #:make-qtree
+   #:qtree-intersect-list
+   #:qtree-valid-p
+   #:qtree-intersect-some
    ;; Macros
+   #:with-gensyms
    #:do-array
    #:do-line
    #:whereas

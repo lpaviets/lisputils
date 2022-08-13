@@ -8,6 +8,8 @@
   :serial t
   :depends-on (#:cl-ppcre #:heap)
   :components ((:file "packages")
+               (:file "point")
+               (:file "quad-tree")
                (:file "heap+")
                (:file "utilities")
                (:file "macros")
