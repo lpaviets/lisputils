@@ -1,6 +1,6 @@
 ;;; Parsing
 
-(in-package #:numbra)
+(in-package #:org.numbra.perso.io)
 
 ;; Reading from files
 (defun read-file-as-lines (filename &key parse)

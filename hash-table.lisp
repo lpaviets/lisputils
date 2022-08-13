@@ -1,7 +1,7 @@
 ;;; numbra:
 ;;; Hash-table
 
-(in-package #:numbra)
+(in-package #:org.numbra.perso.ds)
 
 (defun ht-count (item table &key key (test 'eql) value)
   "Return the number of entries in TABLE satisfying a test with ITEM,

@@ -1,7 +1,7 @@
 ;;; numbra:
 ;;; Utilities
 
-(in-package #:numbra)
+(in-package #:org.numbra.perso.utils)
 
 (defun flip (x y &optional (comp 'equal) (keep-others t))
   "Return a function of one argument which swaps X and Y

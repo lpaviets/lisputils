@@ -1,7 +1,7 @@
 ;;; numbra:
 ;;; Quad-trees
 
-(in-package #:numbra)
+(in-package #:org.numbra.perso.ds)
 
 ;;; Quad-box
 

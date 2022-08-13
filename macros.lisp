@@ -1,7 +1,7 @@
 ;;; numbra:
 ;;; Macros
 
-(in-package #:numbra)
+(in-package #:org.numbra.perso.utils)
 
 (defmacro with-gensyms (gensyms &body body)
   "GENSYMS is a list of symbols SYM, or of pairs (SYM VAL).

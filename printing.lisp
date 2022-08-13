@@ -1,7 +1,7 @@
 ;;; numbra
 ;;; Printing
 
-(in-package #:numbra)
+(in-package #:org.numbra.perso.io)
 
 (defun print-array (array &optional sep)
   (loop :for i :below (array-dimension array 0) :do

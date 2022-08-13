@@ -1,7 +1,7 @@
 ;;; numbra:
 ;;; Algorithms
 
-(in-package #:numbra)
+(in-package #:org.numbra.perso.algo)
 
 ;;; Dijkstra
 ;;; Algo:
