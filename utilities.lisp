@@ -19,6 +19,14 @@ Otherwise, elements that are not X nor Y are mapped to Y"
         :until (= i (or n m))
         :collect i))
 
+(defun lazy-range (m &optional n (step 1))
+  (let ((i (if n m 0))
+        (end (or n m)))
+    (lambda (default)
+      (if (= i end)
+          default
+          (prog1 i (incf i step))))))
+
 (defun permutations (n)
   "List of all the permutations of the integers between 0 and n included"
   (if (zerop n)

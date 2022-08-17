@@ -8,12 +8,15 @@
    #:neighbours
    #:flip
    #:range
+   #:lazy-range
    #:permutations
    #:sublists-length
    #:extremum
    #:extremum-array
    #:deepcopy
-   #:shuffle))
+   #:shuffle
+   #:for
+   #:make-iterable))
 
 (defpackage #:org.numbra.perso.io
   (:use #:cl)
@@ -50,6 +53,7 @@
    #:heap-flush
    #:heap-contents
    ;; - Hash tables
+   #:ht-create
    #:ht-count-if
    #:ht-count
    ;; Quad-trees
@@ -93,12 +97,15 @@
    #:neighbours
    #:flip
    #:range
+   #:lazy-range
    #:permutations
    #:sublists-length
    #:extremum
    #:extremum-array
    #:deepcopy
    #:shuffle
+   #:for
+   #:make-iterable
    ;; Algorithms
    #:shortest-path
    #:shortest-path-dec-key
