@@ -4,7 +4,6 @@
    #:with-gensyms
    #:do-array
    #:do-line
-   #:whereas
    #:neighbours
    #:flip
    #:range
@@ -142,7 +141,6 @@
    #:with-gensyms
    #:do-array
    #:do-line
-   #:whereas
    ;; Printing
    #:print-array
    #:print-hash))
