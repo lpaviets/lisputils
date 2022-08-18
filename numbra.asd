@@ -17,4 +17,5 @@
                (:file "iter")
                (:file "algorithms")
                (:file "parsing")
-               (:file "printing")))
+               (:file "printing")
+               (:file "aoc")))

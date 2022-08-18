@@ -74,12 +74,19 @@
    #:a-star
    #:dfs))
 
+(defpackage #:org.numbra.perso.aoc
+  (:use #:cl)
+  (:export
+   #:gen-packages
+   #:create-files-templates))
+
 (defpackage #:org.numbra.perso
   (:use #:cl
         #:org.numbra.perso.utils
         #:org.numbra.perso.io
         #:org.numbra.perso.ds
-        #:org.numbra.perso.algo)
+        #:org.numbra.perso.algo
+        #:org.numbra.perso.aoc)
   (:export
    ;; Parsing
    #:read-file-as-lines
@@ -143,4 +150,7 @@
    #:do-line
    ;; Printing
    #:print-array
-   #:print-hash))
+   #:print-hash
+   ;; Advent of code
+   #:gen-packages
+   #:create-files-templates))
