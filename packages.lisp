@@ -10,8 +10,7 @@
    #:lazy-range
    #:permutations
    #:sublists-length
-   #:extremum
-   #:extremum-array
+   #:argmax
    #:deepcopy
    #:shuffle
    #:for
@@ -106,8 +105,7 @@
    #:lazy-range
    #:permutations
    #:sublists-length
-   #:extremum
-   #:extremum-array
+   #:argmax
    #:deepcopy
    #:shuffle
    #:for

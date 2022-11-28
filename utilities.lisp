@@ -69,35 +69,99 @@ If SELF is non-nil, include (I J) too"
                   neighbours)))))
     neighbours))
 
-(defun extremum (list predicate &key key)
-  "Return the value of the element for the comparison operator PREDICATE in
-LIST. If KEY is non-NIL, PREDICATE is applied to (KEY ELEMENT) instead of
-ELEMENT at each step"
-  (when list
-    (let* ((element (first list))
-           (val (if key (funcall key element) element)))
-      (mapc (lambda (x)
-              (let ((val-x (if key (funcall key x) x)))
-                (when (funcall predicate val-x val)
-                  (psetf element x
-                         val val-x))))
-            list)
-      element)))
+(defgeneric argmax (sequence &key (test #'<) (start 0) end key)
+  :documentation "Returns OBJ maximizing TEST in SEQUENCE between START and END.
+If END is NIL, search it until the end of the sequence.
+If KEY is non NIL, applies it to each element instead of using them
+directly.
+Additionally, the position of the element is returned as a secondary value,
+as a list, as SEQUENCE might be a multi-dimensional object, and its value
+for KEY as a third value.
+If SEQUENCE is empty, return NIL for all three values")
 
-(defun extremum-array (array predicate &key key)
-  "Return the position in the 2D-array ARRAY for which the value of
-(KEY (ARRAY[pos] &optional POS) is minimal for the order induced by PREDICATE
-KEY is a function of 1 mandatory argument (the value of ARRAY at position POS)
-and one optional one (the position, given as a list of length 2)"
-  (let* ((pos '(0 0))
-         (val-pos (aref array 0 0))
-         (val-min (if key (funcall key val-pos '(0 0)) val-pos)))
-    (do-array (i j x array)
-      (let ((val-x (if key (funcall key x (list i j)) x)))
-        (when (funcall predicate val-x val-min)
-          (psetf pos (list i j)
-                 val-min val-x))))
-    pos))
+(defmethod argmax ((sequence list) &key (test #'<) (start 0) end key)
+  (setf sequence (nthcdr start sequence))
+  (cond
+    ((and sequence
+          (or (not end)
+              (> end start)))
+     (loop :with max-idx = start
+           :with max-elt = (first sequence)
+           :with max-val = (if key
+                               (funcall key max-elt)
+                               max-elt)
+           :for elt :in (cdr sequence)
+           :for idx :from start
+           :while (or (not end) (< idx end))
+           :for val = (if key (funcall key elt) elt)
+           :when (funcall test max-val val)
+             :do (setf max-elt elt
+                       max-val val
+                       max-idx idx)
+           :finally
+              (return (values max-elt (list max-idx) max-val))))
+    (t (values nil nil nil))))
+
+(defmethod argmax ((sequence vector) &key (test #'<) (start 0) end key)
+  (let ((length (length sequence)))
+    (cond
+      ((and (< start length)
+            (or (not end)
+                (> end start)))
+       (loop :with max-idx = start
+             :with max-elt = (aref sequence start)
+             :with max-val = (if key
+                                 (funcall key max-elt)
+                                 max-elt)
+             :for idx :from (1+ start)
+             :while (and (< idx length)
+                         (or (not end)
+                             (< idx end)))
+             :for elt = (aref sequence idx)
+             :for val = (if key (funcall key elt) elt)
+             :when (funcall test max-val val)
+               :do (setf max-elt elt
+                         max-val val
+                         max-idx idx)
+             :finally
+                (return (values max-elt (list max-idx) max-val))))
+      (t (values nil nil nil)))))
+
+(defun %array-inverse-row-major-index (array index)
+  (let ((dims (reverse (array-dimensions array)))
+        (res ())
+        rem)
+    (dolist (d dims)
+      (multiple-value-setq (index rem) (truncate index d))
+      (push rem res))
+    res))
+
+(defmethod argmax ((sequence array) &key (test #'<) (start 0) end key)
+  (assert (and (or (null start) (zerop start))
+               (null end))
+          ()
+          "ARGMAX cannot be called on a subarray of a multimensional array~@
+START has to be NIL or 0 instead of ~S~@
+and END has to be NIL instead of ~S~%"
+          start end)
+  (loop :with length = (array-total-size sequence)
+        :with max-idx = (make-list (array-rank sequence) :initial-element 0)
+        :with max-elt = (row-major-aref sequence 0)
+        :with max-val = (if key
+                            (funcall key max-elt)
+                            max-elt)
+        :for idx :from 1
+        :while (< idx length)
+        :for elt = (row-major-aref sequence idx)
+        :for val = (if key (funcall key elt) elt)
+        :when (funcall test max-val val)
+          :do (setf max-elt elt
+                    max-val val
+                    max-idx idx)
+        :finally
+           (return (values max-elt
+                           (%array-inverse-row-major-index sequence max-idx)
+                           max-val))))
 
 (defgeneric deepcopy (thing)
   (:documentation "Recursively creates a copy of THING.")
