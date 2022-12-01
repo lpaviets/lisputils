@@ -69,15 +69,15 @@ If SELF is non-nil, include (I J) too"
                   neighbours)))))
     neighbours))
 
-(defgeneric argmax (sequence &key (test #'<) (start 0) end key)
-  :documentation "Returns OBJ maximizing TEST in SEQUENCE between START and END.
+(defgeneric argmax (sequence &key test start end key)
+  (:documentation "Returns OBJ maximizing TEST in SEQUENCE between START and END.
 If END is NIL, search it until the end of the sequence.
 If KEY is non NIL, applies it to each element instead of using them
 directly.
 Additionally, the position of the element is returned as a secondary value,
 as a list, as SEQUENCE might be a multi-dimensional object, and its value
 for KEY as a third value.
-If SEQUENCE is empty, return NIL for all three values")
+If SEQUENCE is empty, return NIL for all three values"))
 
 (defmethod argmax ((sequence list) &key (test #'<) (start 0) end key)
   (setf sequence (nthcdr start sequence))
