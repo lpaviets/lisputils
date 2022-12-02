@@ -35,3 +35,15 @@ If VALUE is non-nil, compare the table values instead of its keys."
                   (incf counter))))
              table)
     counter))
+
+(defun ht-from-sequence (seq &key (test 'eql) key (start 0) end)
+  (let ((table (make-hash-table :test test)))
+    (reduce (lambda (ign x)
+              (declare (ignore ign))
+              (setf (gethash x table) t))
+            seq
+            :start start
+            :end end
+            :key key
+            :initial-value t)
+    table))
