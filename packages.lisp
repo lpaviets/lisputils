@@ -4,6 +4,9 @@
    #:with-gensyms
    #:do-array
    #:do-line
+   #:do-hash
+   #:do-hashkeys
+   #:do-hashvalues
    #:neighbours
    #:flip
    #:range
@@ -149,6 +152,9 @@
    #:with-gensyms
    #:do-array
    #:do-line
+   #:do-hash
+   #:do-hashkeys
+   #:do-hashvalues
    ;; Printing
    #:print-array
    #:print-hash
