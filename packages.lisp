@@ -4,6 +4,9 @@
    #:with-gensyms
    #:do-array
    #:do-line
+   #:do-hash
+   #:do-hashkeys
+   #:do-hashvalues
    #:neighbours
    #:flip
    #:range
@@ -54,6 +57,7 @@
    #:ht-create
    #:ht-count-if
    #:ht-count
+   #:ht-from-sequence
    ;; Quad-trees
    #:make-box
    #:make-bounding-box
@@ -132,6 +136,8 @@
    ;; - Hash tables
    #:ht-count-if
    #:ht-count
+   #:ht-create
+   #:ht-from-sequence
    ;; Quad-trees
    #:make-box
    #:make-bounding-box
@@ -146,6 +152,9 @@
    #:with-gensyms
    #:do-array
    #:do-line
+   #:do-hash
+   #:do-hashkeys
+   #:do-hashvalues
    ;; Printing
    #:print-array
    #:print-hash

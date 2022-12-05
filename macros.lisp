@@ -65,3 +65,25 @@ point and the ending point."
                  (progn
                    ,@body)))
          ,@body))))
+
+(defmacro do-hash ((x v hash-table) &body body)
+  `(block nil
+     (maphash (lambda (,x ,v)
+                ,@body)
+              ,hash-table)))
+
+(defmacro do-hashkeys ((x hash-table) &body body)
+  (let ((val (gensym)))
+    `(block nil
+       (maphash (lambda (,x ,val)
+                  (declare (ignore ,val))
+                  ,@body)
+                ,hash-table))))
+
+(defmacro do-hashvalues ((x hash-table) &body body)
+  (let ((key (gensym)))
+    `(block nil
+       (maphash (lambda (,key ,x)
+                  (declare (ignore ,key))
+                  ,@body)
+                ,hash-table))))
