@@ -127,6 +127,15 @@ If SEQUENCE is empty, return NIL for all three values"))
                 (return (values max-elt (list max-idx) max-val))))
       (t (values nil nil nil)))))
 
+(defmethod argmax ((sequence hash-table) &key (test #'<) start end key)
+  (declare (ignore start end))
+  (loop :for x :being :the :hash-keys :of sequence
+        :for val = (if key (funcall key x) x)
+        :for replace-max-p = nil :then (funcall test max-val val)
+        :for max-val = val :then (if replace-max-p val max-val)
+        :for max-elt = x :then (if replace-max-p x max-elt)
+        :finally (return (values max-elt nil max-val))))
+
 (defun %array-inverse-row-major-index (array index)
   (let ((dims (reverse (array-dimensions array)))
         (res ())
