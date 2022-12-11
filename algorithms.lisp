@@ -24,7 +24,7 @@
 by EDGES.
 Comparison between vertices is done using TEST"))
 
-(defmethod shortest-path (edges source target &key (test 'eql))
+(defmethod shortest-path ((edges function) source target &key (test 'eql))
   "EDGES is expected to be a function of one element, a vertex (of the
 same type as SOURCE and TARGET), and return a list of cons cells,
 whose car is an adjacent vertex and whose cdr is the edge's weight.
