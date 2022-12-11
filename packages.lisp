@@ -42,6 +42,8 @@
   (:export
    ;; - Points
    #:point
+   #:point-x
+   #:point-y
    #:add-point
    #:sub-point
    #:with-point
@@ -67,7 +69,15 @@
    #:make-qtree
    #:qtree-intersect-list
    #:qtree-valid-p
-   #:qtree-intersect-some))
+   #:qtree-intersect-some
+   ;; Queue
+   #:queue
+   #:make-queue
+   #:queue-push
+   #:queue-pop
+   #:queue-to-list
+   #:queue-empty-p
+   #:queue-size))
 
 (defpackage #:org.numbra.perso.algo
   (:use #:cl #:org.numbra.perso.ds)
@@ -122,6 +132,8 @@
    ;; Data structures:
    ;; - Points
    #:point
+   #:point-x
+   #:point-y
    #:add-point
    #:sub-point
    #:with-point
@@ -148,6 +160,14 @@
    #:qtree-intersect-list
    #:qtree-valid-p
    #:qtree-intersect-some
+   ;; Queue
+   #:queue
+   #:make-queue
+   #:queue-push
+   #:queue-pop
+   #:queue-to-list
+   #:queue-empty-p
+   #:queue-size
    ;; Macros
    #:with-gensyms
    #:do-array
