@@ -42,6 +42,8 @@
   (:export
    ;; - Points
    #:point
+   #:point-x
+   #:point-y
    #:add-point
    #:sub-point
    #:with-point
@@ -122,6 +124,8 @@
    ;; Data structures:
    ;; - Points
    #:point
+   #:point-x
+   #:point-y
    #:add-point
    #:sub-point
    #:with-point

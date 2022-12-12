@@ -8,6 +8,10 @@
 (defun point (x y)
   (make-instance 'point :x x :y y))
 
+(defmethod print-object ((obj point) stream)
+  (print-unreadable-object (obj stream :type t :identity t)
+    (format stream "X: ~S Y: ~S" (point-x obj) (point-y obj))))
+
 (defmacro with-point ((x y) point &body body)
   `(with-accessors ((,x point-x)
                     (,y point-y))
