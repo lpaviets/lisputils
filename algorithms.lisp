@@ -145,9 +145,9 @@ See `shortest-path-dec-key' for the other arguments."
                  (return (values (gethash target distance)
                                  parent))))))
 
-;; DFS
-
-(defun dfs* (edges pending &key at-vertex (test 'eql) target random)
+;;;; Graph traversal algorithms
+;;;DFS
+(defun %dfs (edges pending &key at-vertex (test 'eql) target (target-test test) random)
   (let ((visited (make-hash-table :test test)))
     (loop :while pending
           :for (x parent cost) = (pop pending)
@@ -160,9 +160,9 @@ See `shortest-path-dec-key' for the other arguments."
             (setf (gethash x visited) t)
             (when at-vertex
               (funcall at-vertex x parent cost))
-          :until (and target (funcall test x target)))))
+          :until (and target (funcall target-test x target)))))
 
-(defun dfs (edges source &key at-vertex (test 'eql) target random)
+(defun dfs (edges source &key at-vertex (test 'eql) target (target-test test) random)
   "Depth-First-Search of the graph determined by EDGES.
 EDGES is a function of one argument, a vertex, and return a list of cons cells
 (NEIGHBOUR . EDGE-WEIGHT)
@@ -170,11 +170,67 @@ SOURCE is the initial vertex from which to perform the DFS
 AT-VERTEX is a function of three argument, the vertex being visited, its parent,
  and the cost of the edge used to reach it.
 TEST is how vertices are compared
-If TARGET is non-NIL, the DFS stops after reaching a vertex equal (as of TEST)
+If TARGET is non-NIL, the DFS stops after reaching a vertex equal (as of TARGET-TEST)
 to it.
 RANDOM determines whether the edges are searched in a deterministic way or not"
-  (dfs* edges (list (list source))
+  (%dfs edges (list (list source))
         :at-vertex at-vertex
         :test test
         :target target
+        :target-test target-test
         :random random))
+
+;;; BFS
+(defun %bfs (edges pending distance parents at-vertex test target target-test random)
+  (let ((visited (make-hash-table :test test))
+        distance-target)
+    (loop :until (queue-empty-p pending)
+          :for (x parent cost) = (queue-pop pending)
+          :for at-target-p = (and target (funcall target-test x target))
+          :unless (gethash x visited) :do
+            ;; Add the neighbours
+            (loop :with dist-x = (gethash x distance)
+                  :for (y . cost) :in (if random
+                                          (shuffle (funcall edges x))
+                                          (funcall edges x))
+                  :do (queue-push pending (list y x cost))
+                      ;; Update the distance/parent of the vertex
+                      (setf (gethash y distance) (1+ (gethash x distance))) ; don't consider COST
+                      (setf (gethash y parents) x))
+            ;; Mark the vertex as visited
+            (setf (gethash x visited) t)
+            (when at-vertex
+              (funcall at-vertex x parent cost))
+          :until (and at-target-p
+                      (setf distance-target (gethash x distance))))
+    (values distance-target distance parents)))
+
+(defun bfs (edges source &key at-vertex (test 'eql) target (target-test test) random)
+  "Breadth-First-Search of the graph determined by EDGES.
+EDGES is a function of one argument, a vertex, and return a list of cons cells
+(NEIGHBOUR . EDGE-WEIGHT)
+SOURCE is the initial vertex from which to perform the BFS
+AT-VERTEX is a function of three argument, the vertex being visited, its parent,
+ and the cost of the edge used to reach it.
+TEST is how vertices are compared
+If TARGET is non-NIL, the BFS stops after reaching a vertex equal (as of TARGET-TEST)
+to it.
+RANDOM determines whether the edges are searched in a deterministic way or not
+Returns three values:
+- The distance from SOURCE to TARGET (or NIL if target is unspecified or unreached)
+- A hash-table containing the distances from SOURCE to each vertex
+- A hash-table containing the parent of each vertex, on the shortest path from
+SOURCE to it"
+  (let ((distance (make-hash-table :test test))
+        (parents (make-hash-table :test test)))
+    (setf (gethash source parents) nil)
+    (setf (gethash source distance) 0)
+    (%bfs edges
+          (make-queue (list source))
+          distance
+          parents
+          at-vertex
+          test
+          target
+          target-test
+          random)))

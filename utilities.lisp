@@ -199,7 +199,7 @@ and END has to be NIL instead of ~S~%"
              thing)
     table))
 
-(defun shuffle* (list len acc)
+(defun %shuffle (list len acc)
   (declare (type list list acc)
            (type fixnum len)
            (optimize (speed 3)))
@@ -212,4 +212,4 @@ and END has to be NIL instead of ~S~%"
         (%shuffle (cdr list) (+ len 1) new-acc))))
 
 (defun shuffle (list)
-  (shuffle* list 0 nil))
+  (%shuffle list 0 nil))

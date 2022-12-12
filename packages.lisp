@@ -80,12 +80,13 @@
    #:queue-size))
 
 (defpackage #:org.numbra.perso.algo
-  (:use #:cl #:org.numbra.perso.ds)
+  (:use #:cl #:org.numbra.perso.ds #:org.numbra.perso.utils)
   (:export
    #:shortest-path
    #:shortest-path-dec-key
    #:a-star
-   #:dfs))
+   #:dfs
+   #:bfs))
 
 (defpackage #:org.numbra.perso.aoc
   (:use #:cl)
@@ -129,6 +130,7 @@
    #:shortest-path-dec-key
    #:a-star
    #:dfs
+   #:bfs
    ;; Data structures:
    ;; - Points
    #:point
