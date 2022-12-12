@@ -69,15 +69,24 @@
    #:make-qtree
    #:qtree-intersect-list
    #:qtree-valid-p
-   #:qtree-intersect-some))
+   #:qtree-intersect-some
+   ;; Queue
+   #:queue
+   #:make-queue
+   #:queue-push
+   #:queue-pop
+   #:queue-to-list
+   #:queue-empty-p
+   #:queue-size))
 
 (defpackage #:org.numbra.perso.algo
-  (:use #:cl #:org.numbra.perso.ds)
+  (:use #:cl #:org.numbra.perso.ds #:org.numbra.perso.utils)
   (:export
    #:shortest-path
    #:shortest-path-dec-key
    #:a-star
-   #:dfs))
+   #:dfs
+   #:bfs))
 
 (defpackage #:org.numbra.perso.aoc
   (:use #:cl)
@@ -121,6 +130,7 @@
    #:shortest-path-dec-key
    #:a-star
    #:dfs
+   #:bfs
    ;; Data structures:
    ;; - Points
    #:point
@@ -152,6 +162,14 @@
    #:qtree-intersect-list
    #:qtree-valid-p
    #:qtree-intersect-some
+   ;; Queue
+   #:queue
+   #:make-queue
+   #:queue-push
+   #:queue-pop
+   #:queue-to-list
+   #:queue-empty-p
+   #:queue-size
    ;; Macros
    #:with-gensyms
    #:do-array
