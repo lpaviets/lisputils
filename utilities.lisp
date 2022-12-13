@@ -213,3 +213,16 @@ and END has to be NIL instead of ~S~%"
 
 (defun shuffle (list)
   (%shuffle list 0 nil))
+
+(defun ensure-list (obj)
+  (if (listp obj) obj (list obj)))
+
+(defun substitute-assoc (alist sequence &key (test #'eql) key (start 0) end)
+  (flet ((subs (seq old-new)
+           (substitute (cdr old-new) (car old-new) seq
+                       :test test
+                       :key key
+                       :start start
+                       :end end)))
+    (reduce #'subs alist
+            :initial-value sequence)))

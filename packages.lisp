@@ -16,6 +16,8 @@
    #:argmax
    #:deepcopy
    #:shuffle
+   #:ensure-list
+   #:substitute-assoc
    #:for
    #:make-iterable))
 
@@ -123,6 +125,8 @@
    #:argmax
    #:deepcopy
    #:shuffle
+   #:ensure-list
+   #:substitute-assoc
    #:for
    #:make-iterable
    ;; Algorithms
