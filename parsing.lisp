@@ -5,14 +5,16 @@
 ;;;; Reading from files
 ;;;; Most functions take a PARSE keyword argument, supposed to be a function
 ;;;; This function is applied to each line of the input before collecting it
-(defun read-file-as-lines (filename &key parse)
+(defun read-file-as-lines (filename &key parse delete-empty)
   "Read file into a list of lines."
   (with-open-file (in filename)
     (loop :for line = (read-line in nil nil)
           :while line
-          :collect (if parse
-                       (funcall parse line)
-                       line))))
+          :unless (and delete-empty
+                       (string= line ""))
+            :collect (if parse
+                         (funcall parse line)
+                         line))))
 
 (defun read-file-one-line (filename &key parse)
   "Read the first line of FILENAME, applying PARSE to it if non-NIL"
