@@ -88,7 +88,8 @@
    #:shortest-path-dec-key
    #:a-star
    #:dfs
-   #:bfs))
+   #:bfs
+   #:shortest-path-all-to-all))
 
 (defpackage #:org.numbra.perso.aoc
   (:use #:cl)
@@ -135,6 +136,7 @@
    #:a-star
    #:dfs
    #:bfs
+   #:shortest-path-all-to-all
    ;; Data structures:
    ;; - Points
    #:point
