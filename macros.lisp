@@ -87,3 +87,16 @@ point and the ending point."
                   (declare (ignore ,key))
                   ,@body)
                 ,hash-table))))
+
+(defmacro dotimes-product (((variable &rest range) &rest vars-ranges) &body body)
+  (destructuring-bind (start end step)
+      (ecase (length range)
+        (1 (list 0 (first range) 1))
+        (2 (list (first range) (second range) 1))
+        (3 range))
+    (with-gensyms ((gstart start) (gend end) (gstep step))
+      `(loop :for ,variable :from ,gstart :below ,gend :by ,gstep
+             :do ,(if vars-ranges
+                      `(dotimes-product (,(first vars-ranges) ,@(rest vars-ranges))
+                         ,@body)
+                      (cons 'progn body))))))
