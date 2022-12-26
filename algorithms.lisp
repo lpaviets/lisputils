@@ -168,7 +168,8 @@ between them"
                 (let ((wij (aref matrix i j))
                       (wik (aref matrix i k))
                       (wkj (aref matrix k j)))
-                  (%update-floy-warshall wij wik wkj))))))))
+                  (%update-floy-warshall wij wik wkj))))))
+    matrix))
 
 ;;;; Graph traversal algorithms
 ;;;DFS
