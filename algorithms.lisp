@@ -145,6 +145,32 @@ See `shortest-path-dec-key' for the other arguments."
                  (return (values (gethash target distance)
                                  parent))))))
 
+(defun %update-floy-warshall (wij wik wkj)
+  (cond
+    ((and wij wik wkj)
+     (min wij (+ wik wkj)))
+    (wij wij)
+    ((and wik wkj)
+     (+ wik wkj))
+    (t nil)))
+
+(defun shortest-path-all-to-all (adjacency-matrix)
+  "Computes the shortest path from any vertex to any other vertex
+ADJACENCY-MATRIX is a 2D array containing in position (i, j) the
+distance between the vertices i and j, or NIL if there is no edge
+between them"
+  (let* ((n (array-dimension adjacency-matrix 0))
+         (matrix (deepcopy adjacency-matrix)))
+    (dotimes (k n)
+      (dotimes (i n)
+        (dotimes (j n)
+          (setf (aref matrix i j)
+                (let ((wij (aref matrix i j))
+                      (wik (aref matrix i k))
+                      (wkj (aref matrix k j)))
+                  (%update-floy-warshall wij wik wkj))))))
+    matrix))
+
 ;;;; Graph traversal algorithms
 ;;;DFS
 (defun %dfs (edges pending &key at-vertex (test 'eql) target (target-test test) random)

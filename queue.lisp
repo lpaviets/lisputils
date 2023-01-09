@@ -3,6 +3,12 @@
 
 (in-package #:org.numbra.perso.ds)
 
+
+;;;; Idea: the queue is simply a list, stored in HEAD
+;;;; POP pops items from the HEAD
+;;;; TAIL is a "pointer" to the last cons cell of HEAD; it is used to
+;;;; PUSH items at the end of the list.
+
 (defclass queue ()
   ((head :initarg :head :accessor queue-head)
    (tail :initarg :tail :accessor queue-tail)
@@ -22,12 +28,13 @@
           "Trying to push on ~S: not a QUEUE" queue)
   (when elt
     (with-accessors ((tail queue-tail)
-                     (size queue-size))
+                     (size queue-size)
+                     (head queue-head))
         queue
-      (if tail
+      (if tail                          ; Is the queue empty ?
           (setf (cdr tail) elt
                 tail (last tail))
-          (setf (queue-head queue) elt
+          (setf head elt
                 tail (last elt)))
       (incf size (length elt))))
   queue)
@@ -59,4 +66,4 @@
 
 (defmethod print-object ((queue queue) stream)
   (print-unreadable-object (queue stream :type t :identity t)
-    (format stream "HEAD ~D" (first (queue-head queue)))))
+    (format stream "HEAD: ~A" (first (queue-head queue)))))
