@@ -15,15 +15,21 @@ Otherwise, elements that are not X nor Y are mapped to Y"
       (t y))))
 
 (defun range (m &optional n (step 1))
-  (loop :for i = (if n m 0) :then (+ i step)
-        :until (= i (or n m))
-        :collect i))
+  (assert (not (zerop step)) () "STEP cannot be 0")
+  (let ((start (if n m 0))
+        (end (if n n m))
+        (test (if (plusp step) #'>= #'<=)))
+    (loop :for i = start :then (+ i step)
+          :until (funcall test i end)
+          :collect i)))
 
 (defun lazy-range (m &optional n (step 1))
+  (assert (not (zerop step)) () "STEP cannot be 0")
   (let ((i (if n m 0))
-        (end (or n m)))
+        (end (or n m))
+        (test (if (plusp step) #'>= #'<=)))
     (lambda (default)
-      (if (= i end)
+      (if (funcall test i end)
           default
           (prog1 i (incf i step))))))
 
