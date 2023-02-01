@@ -40,6 +40,8 @@ always refer to the innermost construct."
 (defgeneric make-iterable (obj)
   (:documentation "Return an ITERABLE object, that is, a function that can be
 repeatedly called to return the elements of OBJ.
+If appropriate, any object that can be FUNCALLed can be returned by a method
+specializing on MAKE-ITERABLE instead.
 This function should take no argument, and return two values, as GETHASH:
 the first value is the (possible) element obtained at the current step, and
 the second value is T or NIL; it is NIL if and only if we are at the end of

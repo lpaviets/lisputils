@@ -79,8 +79,8 @@
       quadrants)))
 
 ;;; Quad-trees
-(defvar *max-qtree-objects* 10)
-(defvar *max-qtree-level* 7)
+(defvar *qtree-split-threshold* 10)
+(defvar *qtree-max-depth* 7)
 
 (defclass quad-tree ()
   ((level
@@ -97,9 +97,19 @@
     :accessor bounds
     :initarg :bounds
     :initform (error "A bounding box needs to be specified")
-    :type quad-box))
+    :type quad-box)
+   (depth
+    :reader depth
+    :initarg :depth
+    :type fixnum)
+   (threshold
+    :reader threshold
+    :initarg :threshold
+    :type fixnum))
   (:default-initargs
-   :objects (make-hash-table :test #'eq :size (1+ *max-qtree-objects*))))
+   :objects (make-hash-table :test #'eq :size (1+ *qtree-split-threshold*))
+   :depth *qtree-max-depth*
+   :threshold *qtree-split-threshold*))
 
 (defun qtree-objects-count (tree)
   (hash-table-count (objects tree)))
@@ -182,7 +192,7 @@
          (qtree-objects-add tree object))
         ;; If we are at the lowest possible level, we can't split any
         ;; further so we simply add the object here
-        ((= (level tree) *max-qtree-level*)
+        ((= (level tree) (depth tree))
          (qtree-objects-add tree object))
         ;; Otherwise, if there are already sub-nodes, we add it in the
         ;; correct one
@@ -194,7 +204,7 @@
       ;; We now need to fix the fact that the current node might be contain
       ;; too many objects.
       ;; We need to split & move things to the right place afterwards
-      (when (> (qtree-objects-count tree) *max-qtree-objects*)
+      (when (> (qtree-objects-count tree) (threshold tree))
         (unless (nodes tree) (qtree-split tree))
         (qtree-move-objects-to-subnodes tree)))))
 

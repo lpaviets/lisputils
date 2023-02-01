@@ -13,6 +13,7 @@
                (:file "quad-tree")
                (:file "heap+")
                (:file "utilities")
+               (:file "queue")
                (:file "hash-table")
                (:file "iter")
                (:file "algorithms")

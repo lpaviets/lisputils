@@ -7,6 +7,7 @@
    #:do-hash
    #:do-hashkeys
    #:do-hashvalues
+   #:dotimes-product
    #:neighbours
    #:flip
    #:range
@@ -183,6 +184,7 @@
    #:do-hash
    #:do-hashkeys
    #:do-hashvalues
+   #:dotimes-product
    ;; Printing
    #:print-array
    #:print-hash
