@@ -2,14 +2,40 @@
 
 (defmacro for ((var-or-vars sequence) &body body)
   "Iterate through SEQUENCE, binding VAR-OR-VARS to its successive elements.
+
 If VAR-OR-VARS is a symbol, it is bound as if by LET to those elements.
+
 If it is a (possibly nested) list, VAR-OR-VARS is bound as if by DESTRUCTURING-BIND.
-BODY is then executed at each step, with VAR-OR-VARS bound as described."
-  (with-gensyms (continuep iterable)
-    `(loop :with ,iterable = (make-iterable ,sequence)
-           :for (,var-or-vars ,continuep) = (multiple-value-list (funcall ,iterable))
-           :while ,continuep
-           :do ,@body)))
+
+BODY is then executed at each step, with VAR-OR-VARS bound as described.
+
+Within BODY, the keyword BREAK stops the execution of the loop, and
+the keyword CONTINUE stops this iteration and continues with the next
+one. Note that BREAK and CONTINUE are to be used as /variables/, not
+as functions:
+
+(for (x '(a b c d e))
+  (case x
+    (b continue)
+    (d break))
+  (print x))
+
+  will print
+
+a
+c
+
+FOR constructs can be nested. In that case, CONTINUE and BREAK will
+always refer to the innermost construct."
+  (with-gensyms (next-p iterable block-name loop-name)
+    `(symbol-macrolet ((break (return-from ,loop-name))
+                       (continue (return-from ,block-name)))
+       (loop :named ,loop-name
+             :with ,iterable = (make-iterable ,sequence)
+             :for (,var-or-vars ,next-p) = (multiple-value-list (funcall ,iterable))
+             :while ,next-p
+             :do (block ,block-name
+                   ,@body)))))
 
 (defgeneric make-iterable (obj)
   (:documentation "Return an ITERABLE object, that is, a function that can be
