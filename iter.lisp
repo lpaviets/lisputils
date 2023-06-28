@@ -27,25 +27,34 @@ c
 
 FOR constructs can be nested. In that case, CONTINUE and BREAK will
 always refer to the innermost construct."
-  (with-gensyms (next-p iterable block-name loop-name)
+  (with-gensyms (val next-p iterable block-name loop-name)
     `(symbol-macrolet ((break (return-from ,loop-name))
                        (continue (return-from ,block-name)))
        (loop :named ,loop-name
              :with ,iterable = (make-iterable ,sequence)
-             :for (,var-or-vars ,next-p) = (multiple-value-list (funcall ,iterable))
-             :while ,next-p
              :do (block ,block-name
-                   ,@body)))))
+                   (multiple-value-bind (,val ,next-p)
+                       (funcall ,iterable)
+                     (unless ,next-p break)
+                     ,(if (symbolp var-or-vars)
+                          `(let ((,var-or-vars ,val))
+                             ,@body)
+                          `(destructuring-bind ,var-or-vars
+                               ,val
+                             ,@body))))))))
 
 (defgeneric make-iterable (obj)
   (:documentation "Return an ITERABLE object, that is, a function that can be
 repeatedly called to return the elements of OBJ.
+
 If appropriate, any object that can be FUNCALLed can be returned by a method
 specializing on MAKE-ITERABLE instead.
+
 This function should take no argument, and return two values, as GETHASH:
-the first value is the (possible) element obtained at the current step, and
-the second value is T or NIL; it is NIL if and only if we are at the end of
+- the first value is the (possible) element obtained at the current step, and
+- the second value is T or NIL; it is NIL if and only if we are at the end of
 the iterable.
+
 The effects are undefined if OBJ is destructively modified by the calls to
 ITERABLE"))
 

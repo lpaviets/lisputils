@@ -16,6 +16,7 @@
                (:file "queue")
                (:file "hash-table")
                (:file "iter")
+               (:file "union-find")
                (:file "algorithms")
                (:file "parsing")
                (:file "printing")

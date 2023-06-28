@@ -80,7 +80,12 @@
    #:queue-pop
    #:queue-to-list
    #:queue-empty-p
-   #:queue-size))
+   #:queue-size
+   ;; Union-find
+   #:uf-initialize
+   #:uf-find
+   #:uf-union
+   #:equivalence-classes))
 
 (defpackage #:org.numbra.perso.algo
   (:use #:cl #:org.numbra.perso.ds #:org.numbra.perso.utils)
@@ -177,6 +182,11 @@
    #:queue-to-list
    #:queue-empty-p
    #:queue-size
+   ;; Union-find
+   #:uf-initialize
+   #:uf-find
+   #:uf-union
+   #:equivalence-classes
    ;; Macros
    #:with-gensyms
    #:do-array
