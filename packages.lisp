@@ -35,6 +35,7 @@
    #:read-file-as-array
    ;; Small parsing utils
    #:coma-separated-int-line
+   #:collect-integers-in-line
    #:split-word-int
    ;; Printing
    #:print-array
@@ -121,6 +122,7 @@
    #:read-file-as-array
    ;; Small parsing utils
    #:coma-separated-int-line
+   #:collect-integers-in-line
    #:split-word-int
    ;; Generic utilities
    #:neighbours

@@ -56,7 +56,7 @@ line is read as (FORMAT NIL \"(~A)\" (FUNCALL PARSE <line>))"
                                                    (funcall parse line)
                                                    line))))))
 
-(defun read-array (list &optional (digits t))
+(defun read-array (list &key as-digits)
   "Read a 2D-array. If DIGITS is non-nil, parses elements as digits"
   (loop :with array = (make-array (list (list-length list)
                                         (length (car list))))
@@ -64,12 +64,15 @@ line is read as (FORMAT NIL \"(~A)\" (FUNCALL PARSE <line>))"
         :for i :from 0 :do
           (loop :for c :across line
                 :for j :from 0
-                :for val = (or (digit-char-p c) c)
+                :for val = (if as-digits
+                               (or (digit-char-p c)
+                                   (error "Expected a digit, got ~A instead" c))
+                               c)
                 :do (setf (aref array i j) val))
         :finally (return array)))
 
-(defun read-file-as-array (filename &optional (digits t))
-  (read-array (read-file-as-lines filename) digits))
+(defun read-file-as-array (filename &key as-digits)
+  (read-array (read-file-as-lines filename) as-digits))
 
 ;; Other parsing utilities
 
@@ -77,6 +80,19 @@ line is read as (FORMAT NIL \"(~A)\" (FUNCALL PARSE <line>))"
   (ppcre:register-groups-bind (word (#'parse-integer int))
       ("\(\\w+\) \(\\d+\)" line)
     (cons word int)))
+
+(defun collect-integers-in-line (line)
+  "Return the list of all the matched integers in LINE.
+An integer is anything optionnally starting with an optional -,
+and consisting only of digits.
+
+Example:
+
+(collect-integers-in-line \"125-4x89 -9k:-09\")
+=> (125 -4 89 -9 -9)"
+  (let (acc)
+    (ppcre:do-matches-as-strings (i "-?\\d+" line (reverse acc))
+      (push (parse-integer i) acc))))
 
 (defun coma-separated-int-line (line)
   (mapcar 'parse-integer (ppcre:split " *, *" line)))
