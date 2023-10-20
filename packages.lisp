@@ -98,19 +98,12 @@
    #:bfs
    #:shortest-path-all-to-all))
 
-(defpackage #:org.numbra.perso.aoc
-  (:use #:cl)
-  (:export
-   #:gen-packages
-   #:create-files-templates))
-
 (defpackage #:org.numbra.perso
   (:use #:cl
         #:org.numbra.perso.utils
         #:org.numbra.perso.io
         #:org.numbra.perso.ds
-        #:org.numbra.perso.algo
-        #:org.numbra.perso.aoc)
+        #:org.numbra.perso.algo)
   (:export
    ;; Parsing
    #:read-file-as-lines
@@ -203,3 +196,31 @@
    ;; Advent of code
    #:gen-packages
    #:create-files-templates))
+
+;;;; Extra stuff
+(defpackage #:org.numbra.perso.machine
+  (:use #:cl #:org.numbra.perso.utils)
+  (:export
+   #:memory
+   #:register
+   #:code
+   #:ptr
+   #:value
+   #:defassembly
+   #:make-machine
+   #:run-machine))
+
+(defpackage #:org.numbra.perso.aoc
+  (:use #:cl)
+  (:export
+   #:gen-packages
+   #:create-files-templates))
+
+(defpackage  #:org.numbra.perso.extras
+  (:use #:cl #:org.numbra.perso)
+  (:local-nicknames (#:aoc #:org.numbra.perso.aoc)
+                    (#:machine #:org.numbra.perso.machine)))
+
+(in-package #:org.numbra.perso.extras)
+(do-external-symbols (s (find-package "ORG.NUMBRA.PERSO"))
+  (export s))

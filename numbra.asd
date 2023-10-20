@@ -20,4 +20,7 @@
                (:file "algorithms")
                (:file "parsing")
                (:file "printing")
-               (:file "aoc")))
+               (:module "extras"
+                :components
+                ((:file "machine")
+                 (:file "aoc")))))

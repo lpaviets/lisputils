@@ -15,6 +15,8 @@
                     :collect
                     `(defpackage ,(year-day-to-package year day)
                        (:use :cl #:org.numbra.perso)
+                       (:local-nicknames (#:aoc #:org.numbra.perso.aoc)
+                                         (#:m #:org.numbra.perso.machine))
                        (:export
                         ,(symb :answer-ex- day :-1)
                         ,(symb :answer-ex- day :-2))))))
