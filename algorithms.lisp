@@ -3,6 +3,8 @@
 
 (in-package #:org.numbra.perso.algo)
 
+;;;; GRAPHS
+
 ;;; Dijkstra
 ;;; Algo:
 ;;; Initialization:
@@ -20,7 +22,7 @@
 ;;;         dist[v] <- dist[u] + weight(u, v)
 
 (defgeneric shortest-path (edges source target &key test)
-  (:documentation "Shortest path from SOURCE to TARGET in the graph G determined
+            (:documentation "Shortest path from SOURCE to TARGET in the graph G determined
 by EDGES.
 Comparison between vertices is done using TEST"))
 
