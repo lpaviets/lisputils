@@ -75,17 +75,19 @@ If SELF is non-nil, include (I J) too"
                   neighbours)))))
     neighbours))
 
-(defgeneric argmax (sequence &key test start end key)
+(defgeneric argmax (sequence &key test start end key exclude-null)
   (:documentation "Returns OBJ maximizing TEST in SEQUENCE between START and END.
 If END is NIL, search it until the end of the sequence.
 If KEY is non NIL, applies it to each element instead of using them
 directly.
+If EXCLUDE-NULL is non-NIL, the null values (either themselves, of after
+being applied KEY) are ignored.
 Additionally, the position of the element is returned as a secondary value,
 as a list, as SEQUENCE might be a multi-dimensional object, and its value
 for KEY as a third value.
 If SEQUENCE is empty, return NIL for all three values"))
 
-(defmethod argmax ((sequence list) &key (test #'<) (start 0) end key)
+(defmethod argmax ((sequence list) &key (test #'<) (start 0) end key exclude-null)
   (setf sequence (nthcdr start sequence))
   (cond
     ((and sequence
@@ -97,10 +99,14 @@ If SEQUENCE is empty, return NIL for all three values"))
                                (funcall key max-elt)
                                max-elt)
            :for elt :in (cdr sequence)
-           :for idx :from start
+           :for idx :from (1+ start)
            :while (or (not end) (< idx end))
            :for val = (if key (funcall key elt) elt)
-           :when (funcall test max-val val)
+           :when (cond
+                   ((not exclude-null) (funcall test max-val val))
+                   ((and exclude-null val (not max-val)) t)
+                   ((and exclude-null val max-val) (funcall test max-val val))
+                   (t nil))
              :do (setf max-elt elt
                        max-val val
                        max-idx idx)
@@ -108,7 +114,7 @@ If SEQUENCE is empty, return NIL for all three values"))
               (return (values max-elt (list max-idx) max-val))))
     (t (values nil nil nil))))
 
-(defmethod argmax ((sequence vector) &key (test #'<) (start 0) end key)
+(defmethod argmax ((sequence vector) &key (test #'<) (start 0) end key exclude-null)
   (let ((length (length sequence)))
     (cond
       ((and (< start length)
@@ -125,7 +131,11 @@ If SEQUENCE is empty, return NIL for all three values"))
                              (< idx end)))
              :for elt = (aref sequence idx)
              :for val = (if key (funcall key elt) elt)
-             :when (funcall test max-val val)
+             :when (cond
+                     ((not exclude-null) (funcall test max-val val))
+                     ((and exclude-null val (not max-val)) t)
+                     ((and exclude-null val max-val) (funcall test max-val val))
+                     (t nil))
                :do (setf max-elt elt
                          max-val val
                          max-idx idx)
@@ -133,11 +143,16 @@ If SEQUENCE is empty, return NIL for all three values"))
                 (return (values max-elt (list max-idx) max-val))))
       (t (values nil nil nil)))))
 
-(defmethod argmax ((sequence hash-table) &key (test #'<) start end key)
+(defmethod argmax ((sequence hash-table) &key (test #'<) start end key exclude-null)
   (declare (ignore start end))
   (loop :for x :being :the :hash-keys :of sequence
         :for val = (if key (funcall key x) x)
-        :for replace-max-p = nil :then (funcall test max-val val)
+        :for replace-max-p = nil
+          :then (cond
+                  ((not exclude-null) (funcall test max-val val))
+                  ((and exclude-null val (not max-val)) t)
+                  ((and exclude-null val max-val) (funcall test max-val val))
+                  (t nil))
         :for max-val = val :then (if replace-max-p val max-val)
         :for max-elt = x :then (if replace-max-p x max-elt)
         :finally (return (values max-elt nil max-val))))
@@ -151,7 +166,7 @@ If SEQUENCE is empty, return NIL for all three values"))
       (push rem res))
     res))
 
-(defmethod argmax ((sequence array) &key (test #'<) (start 0) end key)
+(defmethod argmax ((sequence array) &key (test #'<) (start 0) end key exclude-null)
   (assert (and (or (null start) (zerop start))
                (null end))
           ()
@@ -169,7 +184,11 @@ and END has to be NIL instead of ~S~%"
         :while (< idx length)
         :for elt = (row-major-aref sequence idx)
         :for val = (if key (funcall key elt) elt)
-        :when (funcall test max-val val)
+        :when (cond
+                ((not exclude-null) (funcall test max-val val))
+                ((and exclude-null val (not max-val)) t)
+                ((and exclude-null val max-val) (funcall test max-val val))
+                (t nil))
           :do (setf max-elt elt
                     max-val val
                     max-idx idx)
@@ -177,6 +196,18 @@ and END has to be NIL instead of ~S~%"
            (return (values max-elt
                            (%array-inverse-row-major-index sequence max-idx)
                            max-val))))
+
+(defun argmin (sequence &key (test #'<) (start 0) end key exclude-null)
+  "Returns OBJ minimizing TEST in SEQUENCE between START and END.
+For an explanation of the parameters and return values, see `argmax'.
+The function works by calling `argmax' with [argmax]TEST bound to
+(LAMBDA (X Y) (FUNCALL [argmin]TEST Y X)."
+  (argmax sequence
+          :start start
+          :end end
+          :key key
+          :test (lambda (x y) (funcall test y x))
+          :exclude-null exclude-null))
 
 (defgeneric deepcopy (thing)
   (:documentation "Recursively creates a copy of THING.")

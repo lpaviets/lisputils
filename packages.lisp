@@ -15,6 +15,7 @@
    #:permutations
    #:sublists-length
    #:argmax
+   #:argmin
    #:deepcopy
    #:shuffle
    #:ensure-list
@@ -127,6 +128,7 @@
    #:permutations
    #:sublists-length
    #:argmax
+   #:argmin
    #:deepcopy
    #:shuffle
    #:ensure-list
