@@ -20,7 +20,9 @@
    #:ensure-list
    #:substitute-assoc
    #:for
-   #:make-iterable))
+   #:make-iterable
+   #:do-subsets
+   #:do-sequence-subsets))
 
 (defpackage #:org.numbra.perso.io
   (:use #:cl)
@@ -131,6 +133,9 @@
    #:substitute-assoc
    #:for
    #:make-iterable
+   ;; Iterate over subsets
+   #:do-subsets
+   #:do-sequence-subsets
    ;; Algorithms
    #:shortest-path
    #:shortest-path-dec-key
