@@ -14,6 +14,7 @@
    #:lazy-range
    #:permutations
    #:sublists-length
+   #:array-index-row-major
    #:argmax
    #:argmin
    #:deepcopy
@@ -127,6 +128,7 @@
    #:lazy-range
    #:permutations
    #:sublists-length
+   #:array-index-row-major
    #:argmax
    #:argmin
    #:deepcopy

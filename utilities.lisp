@@ -263,3 +263,21 @@ The function works by calling `argmax' with [argmax]TEST bound to
                        :end end)))
     (reduce #'subs alist
             :initial-value sequence)))
+
+;; From Serapeum
+(defun array-index-row-major (array row-major-index)
+  "The inverse of ARRAY-ROW-MAJOR-INDEX.
+
+Given an array and a row-major index, return a list of subscripts.
+
+     (apply #'aref (array-index-row-major i))
+     ≡ (array-row-major-aref i)"
+  (labels ((rec (subs dims)
+             (if (null dims) subs
+                 (multiple-value-bind (q r)
+                     (truncate (car subs)
+                               (the (integer 0 #.array-dimension-limit)
+                                    (car dims)))
+                   (rec (cons q (rplaca subs r))
+                        (cdr dims))))))
+    (rec (list row-major-index) (reverse (rest (array-dimensions array))))))

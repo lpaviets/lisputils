@@ -72,7 +72,7 @@ line is read as (FORMAT NIL \"(~A)\" (FUNCALL PARSE <line>))"
         :finally (return array)))
 
 (defun read-file-as-array (filename &key as-digits)
-  (read-array (read-file-as-lines filename) as-digits))
+  (read-array (read-file-as-lines filename) :as-digits as-digits))
 
 ;; Other parsing utilities
 
