@@ -13,19 +13,17 @@ Example:
   (with-gensyms ((gx x))
     `(+ ,gx ,gx)))"
   (loop :for sym :in gensyms
-        :for gensym = (gensym (if (symbolp sym)
-                                  (symbol-name sym)
-                                  (symbol-name (first sym))))
         :if (symbolp sym)
-          :collect `(,sym ',gensym) :into gensym-list
+          :collect `(,sym (gensym ,(symbol-name sym))) :into gensym-list
         :else
-          :collect `(,(first sym) ',gensym) :into gensym-list
-          :and
-            :collect `(list ,(first sym) ,(second sym)) :into eval-list
+          :collect `(,(first sym) (gensym ,(symbol-name (first sym))))
+            :into gensym-list
+            :and
+              :collect `(list ,(first sym) ,(second sym)) :into eval-list
         :finally
            (return `(let ,gensym-list
-                      (list 'let (list ,@eval-list)
-                            ,@body)))))
+                      `(let (,,@eval-list)
+                         ,,@body)))))
 
 (defmacro do-array ((i j x array &optional return) &body body)
   "Iterate over a 2D array.
