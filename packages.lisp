@@ -47,6 +47,7 @@
 
 (defpackage #:org.numbra.perso.ds
   (:use #:cl)
+  (:local-nicknames (#:utils #:org.numbra.perso.utils))
   (:export
    ;; - Points
    #:point
