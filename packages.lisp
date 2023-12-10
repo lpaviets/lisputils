@@ -92,7 +92,22 @@
    #:uf-initialize
    #:uf-find
    #:uf-union
-   #:equivalence-classes))
+   #:equivalence-classes
+   ;; Intervals
+   #:interval
+   #:make-interval
+   #:with-interval-bounds
+   #:interval-from-number
+   #:interval-intersection
+   #:interval-union
+   #:interval-contains
+   #:interval-equal
+   #:interval-cardinal
+   #:interval-complement
+   #:interval-add
+   #:interval-addf
+   #:interval-sub
+   #:interval-subf))
 
 (defpackage #:org.numbra.perso.algo
   (:use #:cl #:org.numbra.perso.ds #:org.numbra.perso.utils)
@@ -196,6 +211,21 @@
    #:uf-find
    #:uf-union
    #:equivalence-classes
+   ;; Intervals
+   #:interval
+   #:make-interval
+   #:with-interval-bounds
+   #:interval-from-number
+   #:interval-intersection
+   #:interval-union
+   #:interval-contains
+   #:interval-equal
+   #:interval-cardinal
+   #:interval-complement
+   #:interval-add
+   #:interval-addf
+   #:interval-sub
+   #:interval-subf
    ;; Macros
    #:with-gensyms
    #:do-array
