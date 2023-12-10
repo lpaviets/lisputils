@@ -15,6 +15,17 @@ to MAKE-HASH-TABLE"
           :do (setf (gethash key table) val))
     table))
 
+(defun ht-pop (table)
+  "Return a random key from TABLE, and remove it from TABLE. As a
+secondary return value, also return the value associated to it in
+TABLE."
+  (let (rk rv)
+    (block nil
+      (maphash (lambda (k v) (setf rk k rv v)) table)
+      (return))
+    (remhash rk table)
+    (values rk rv)))
+
 (defun ht-count (item table &key key (test 'eql) value)
   "Return the number of entries in TABLE satisfying a test with ITEM,
 which defaults to EQL.

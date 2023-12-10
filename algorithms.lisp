@@ -221,10 +221,11 @@ RANDOM determines whether the edges are searched in a deterministic way or not"
                   :for (y . cost) :in (if random
                                           (shuffle (funcall edges x))
                                           (funcall edges x))
-                  :do (queue-push pending (list y x cost))
-                      ;; Update the distance/parent of the vertex
-                      (setf (gethash y distance) (1+ (gethash x distance))) ; don't consider COST
-                      (setf (gethash y parents) x))
+                  :unless (gethash y visited)
+                    :do (queue-push pending (list y x cost))
+                        ;; Update the distance/parent of the vertex
+                        (setf (gethash y distance) (1+ (gethash x distance))) ; don't consider COST
+                        (setf (gethash y parents) x))
             ;; Mark the vertex as visited
             (setf (gethash x visited) t)
             (when at-vertex
@@ -262,3 +263,31 @@ SOURCE to it"
           target
           target-test
           random)))
+
+(defun connected-components (vertices edges &key (test 'eql))
+  "Return a list of connected components of a graph.
+
+EDGES and TEST play the same role as in `BFS', which see.
+
+VERTICES is a hash-table or a sequence of vertices that are not yet
+explored. Not all vertices need to be present in this table, as long
+as they can be reached by applpying EDGES to a vertex that does belong
+to VERTICES.
+
+Each returned connected component is a hash-table, whose keys are the
+vertices of the component, and whose values are the distance from each
+vertex to some unspecified source vertex from VERTICES."
+  (let ((unexplored (make-hash-table :test test)))
+    (etypecase vertices
+      (hash-table (do-hashkeys (x vertices)
+                    (setf (gethash x unexplored) t)))
+      (sequence (map nil (lambda (x)
+                           (setf (gethash x unexplored) t))
+                     vertices)))
+    (loop :while (plusp (hash-table-count unexplored))
+          :for x = (ht-pop unexplored)
+          :collect (nth-value 1 (bfs edges x
+                                     :at-vertex (lambda (node parent cost)
+                                                  (declare (ignore parent cost))
+                                                  (remhash node unexplored))
+                                     :test test)))))

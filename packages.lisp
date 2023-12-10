@@ -69,6 +69,7 @@
    #:ht-count-if
    #:ht-count
    #:ht-from-sequence
+   #:ht-pop
    ;; Quad-trees
    #:make-box
    #:make-bounding-box
@@ -101,7 +102,8 @@
    #:a-star
    #:dfs
    #:bfs
-   #:shortest-path-all-to-all))
+   #:shortest-path-all-to-all
+   #:connected-components))
 
 (defpackage #:org.numbra.perso
   (:use #:cl
@@ -148,6 +150,7 @@
    #:dfs
    #:bfs
    #:shortest-path-all-to-all
+   #:connected-components
    ;; Data structures:
    ;; - Points
    #:point
@@ -169,6 +172,7 @@
    #:ht-count
    #:ht-create
    #:ht-from-sequence
+   #:ht-pop
    ;; Quad-trees
    #:make-box
    #:make-bounding-box
