@@ -1,3 +1,17 @@
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun re-export-from (from in)
+    "Export all the (external) symbols of the package named
+ORG.NUMBRA.<from> in the package ORG.NUMBRA.<in>
+
+FROM and IN are strings, that will be upcased."
+    (let ((package (find-package (concatenate 'string
+                                              "ORG.NUMBRA."
+                                              (string-upcase in)))))
+      (do-external-symbols (s (find-package (concatenate 'string
+                                                         "ORG.NUMBRA."
+                                                         (string-upcase from))))
+        (export s package)))))
+
 (defpackage #:org.numbra.perso.utils
   (:use #:cl)
   (:export
@@ -125,121 +139,10 @@
         #:org.numbra.perso.utils
         #:org.numbra.perso.io
         #:org.numbra.perso.ds
-        #:org.numbra.perso.algo)
-  (:export
-   ;; Parsing
-   #:read-file-as-lines
-   #:read-file-one-line
-   #:read-file-as-lines-blocks
-   #:read-file-as-integers
-   #:read-file-as-sexprs
-   #:read-array
-   #:read-file-as-array
-   ;; Small parsing utils
-   #:coma-separated-int-line
-   #:collect-integers-in-line
-   #:split-word-int
-   ;; Generic utilities
-   #:neighbours
-   #:flip
-   #:range
-   #:lazy-range
-   #:permutations
-   #:sublists-length
-   #:array-index-row-major
-   #:argmax
-   #:argmin
-   #:deepcopy
-   #:shuffle
-   #:ensure-list
-   #:substitute-assoc
-   #:for
-   #:make-iterable
-   ;; Iterate over subsets
-   #:do-subsets
-   #:do-sequence-subsets
-   ;; Algorithms
-   #:shortest-path
-   #:shortest-path-dec-key
-   #:a-star
-   #:dfs
-   #:bfs
-   #:shortest-path-all-to-all
-   #:connected-components
-   ;; Data structures:
-   ;; - Points
-   #:point
-   #:point-x
-   #:point-y
-   #:add-point
-   #:sub-point
-   #:with-point
-   ;; - Heap
-   #:make-heap
-   #:heap-push
-   #:heap-pop
-   #:heap-peek
-   #:heap-update
-   #:heap-flush
-   #:heap-contents
-   ;; - Hash tables
-   #:ht-count-if
-   #:ht-count
-   #:ht-create
-   #:ht-from-sequence
-   #:ht-pop
-   ;; Quad-trees
-   #:make-box
-   #:make-bounding-box
-   #:qtree-insert
-   #:make-qtree-from-list
-   #:with-box-sides
-   #:make-qtree
-   #:qtree-intersect-list
-   #:qtree-valid-p
-   #:qtree-intersect-some
-   ;; Queue
-   #:queue
-   #:make-queue
-   #:queue-push
-   #:queue-pop
-   #:queue-to-list
-   #:queue-empty-p
-   #:queue-size
-   ;; Union-find
-   #:uf-initialize
-   #:uf-find
-   #:uf-union
-   #:equivalence-classes
-   ;; Intervals
-   #:interval
-   #:make-interval
-   #:with-interval-bounds
-   #:interval-from-number
-   #:interval-intersection
-   #:interval-union
-   #:interval-contains
-   #:interval-equal
-   #:interval-cardinal
-   #:interval-complement
-   #:interval-add
-   #:interval-addf
-   #:interval-sub
-   #:interval-subf
-   ;; Macros
-   #:with-gensyms
-   #:do-array
-   #:do-line
-   #:do-hash
-   #:do-hashkeys
-   #:do-hashvalues
-   #:dotimes-product
-   ;; Printing
-   #:print-array
-   #:print-hash
-   ;; Advent of code
-   #:gen-packages
-   #:create-files-templates))
+        #:org.numbra.perso.algo))
+
+(dolist (from '("utils" "io" "ds" "algo"))
+  (re-export-from (concatenate 'string "PERSO." from) "PERSO"))
 
 ;;;; Extra stuff
 (defpackage #:org.numbra.perso.machine
@@ -265,6 +168,4 @@
   (:local-nicknames (#:aoc #:org.numbra.perso.aoc)
                     (#:machine #:org.numbra.perso.machine)))
 
-(in-package #:org.numbra.perso.extras)
-(do-external-symbols (s (find-package "ORG.NUMBRA.PERSO"))
-  (export s))
+(re-export-from "PERSO" "PERSO.EXTRAS")
