@@ -36,47 +36,26 @@ included in the interval."))
                            res)
          ,@body))))
 
+(defmethod print-object ((obj interval) stream)
+  (with-interval-bounds (s e si ei) obj
+    (print-unreadable-object (obj stream :type t)
+      (format stream "~:[(~;[~]~A, ~A~:[)~;]~]"
+              si s e ei))))
+
+
 (defun interval-from-number (n)
   (make-interval n n '(t . t)))
 
-(defun interval-intersection (interval-1 interval-2)
-  (with-interval-bounds (s1 e1 si1 ei1) interval-1
-    (with-interval-bounds (s2 e2 si2 ei2) interval-2
-      (unless (or (if (and ei1 si2) (< e1 s2) (<= e1 s2))
-                  (if (and ei2 si1) (< e2 s1) (<= e2 s1)))
-        (let (low-val
-              low-incl
-              high-val
-              high-incl)
-          (cond
-            ((< s1 s2) (setf low-val s2
-                             low-incl si2))
-            ((< s2 s1) (setf low-val s1
-                             low-incl si1))
-            (t (setf low-val s1
-                     low-incl (and si1 si2))))
-          (cond
-            ((< e2 e1) (setf high-val e2
-                             high-incl ei2))
-            ((< e1 e2) (setf high-val e1
-                             high-incl ei1))
-            (t (setf high-val e1
-                     high-incl (and ei1 ei2))))
-          (make-interval low-val high-val (cons low-incl high-incl)))))))
-
-(defun interval-union (interval-1 interval-2)
-  "Return the union of the two intervals INTERVAL-1 and INTERVAL-2
-if this union is an interval itself, or equivalently, when they
-intersect."
-  (when (interval-intersection interval-1 interval-2)
-    (with-interval-bounds (s1 e1 si1 ei1) interval-1
-      (with-interval-bounds (s2 e2 si2 ei2) interval-2
-        (make-interval (min s1 s2) (max e1 e2) (cons (or si1 si2) (or ei1 ei2)))))))
-
-(defun interval-contains (interval x)
+;;; Set operations
+(defun interval-contains-p (interval x)
   (with-interval-bounds (s e si ei) interval
     (and (if si (<= s x) (< s x))
          (if ei (<= x e) (< x e)))))
+
+(defun interval-empty-p (interval)
+  (with-interval-bounds (s e si ei) interval
+    (or (< e s)
+        (and (= e s) (not (and si ei))))))
 
 (defun interval-equal (interval-1 interval-2)
   (with-interval-bounds (s1 e1 si1 ei1) interval-1
@@ -97,10 +76,76 @@ intersect."
                     (ceiling (1- e1)))))
       (1+ (- high low)))))
 
+(defun interval-intersect-p (interval-1 interval-2)
+  (with-interval-bounds (s1 e1 si1 ei1) interval-1
+    (with-interval-bounds (s2 e2 si2 ei2) interval-2
+      (not (or (if (and ei1 si2) (< e1 s2) (<= e1 s2))
+               (if (and ei2 si1) (< e2 s1) (<= e2 s1)))))))
+
+(defun %interval-intersection (interval-1 interval-2)
+  (when (and interval-1 interval-2) ; allow to write (reduce 'interval-intersection list-of-interval)
+    (with-interval-bounds (s1 e1 si1 ei1) interval-1
+      (with-interval-bounds (s2 e2 si2 ei2) interval-2
+        (when (interval-intersect-p interval-1 interval-2)
+          (let (low-val
+                low-incl
+                high-val
+                high-incl)
+            (cond
+              ((< s1 s2) (setf low-val s2
+                               low-incl si2))
+              ((< s2 s1) (setf low-val s1
+                               low-incl si1))
+              (t (setf low-val s1
+                       low-incl (and si1 si2))))
+            (cond
+              ((< e2 e1) (setf high-val e2
+                               high-incl ei2))
+              ((< e1 e2) (setf high-val e1
+                               high-incl ei1))
+              (t (setf high-val e1
+                       high-incl (and ei1 ei2))))
+            (make-interval low-val high-val (cons low-incl high-incl))))))))
+
+(defun interval-intersection (interval &rest intervals)
+  (loop :with intersection = interval
+        :for int :in intervals
+        :while intersection
+        :do (setf intersection (%interval-intersection intersection int))
+        :finally (return intersection)))
+
+(defun %interval-union (interval-1 interval-2)
+  (with-interval-bounds (s1 e1 si1 ei1) interval-1
+    (with-interval-bounds (s2 e2 si2 ei2) interval-2
+      (make-interval (min s1 s2) (max e1 e2) (cons (or si1 si2) (or ei1 ei2))))))
+
+(defun interval-union (interval &rest intervals)
+  (let ((all-intervals (sort (cons interval intervals) '< :key 'start)))
+    (loop :with union = (list (car all-intervals))
+          :for int-1 :in (cdr all-intervals)
+          :do (setf union (loop :for (int-2 . rest) :on union
+                                :if (interval-intersect-p int-1 int-2)
+                                  :collect (%interval-union int-1 int-2) :into new-union
+                                  :and :nconc rest :into new-union
+                                  :and :do (return new-union)
+                                :else
+                                  :collect int-2 :into new-union
+                                :finally (return (cons int-1 new-union))))
+          :finally (return union))))
+
+;; To test !
 (defun interval-complement (interval-1 interval-2)
   "Return a list of intervals containing exactly the set of points
-corresponding to the complement of INTERVAL-1 within INTERVAL-2.")
+corresponding to the complement of INTERVAL-1 within INTERVAL-2."
+  (with-interval-bounds (s1 e1 si1 ei1) interval-1
+    (with-interval-bounds (s2 e2 si2 ei2) interval-2
+      (let ((low  (make-interval s2 s1 (cons si2 (not si1))))
+            (high (make-interval e1 e2 (cons (not ei1) ei2))))
+        (remove-if 'interval-empty-p (list
+                                      (%interval-intersection interval-2 low)
+                                      (%interval-intersection interval-2 high)))))))
 
+;;; Arithmetic operations: add, sub ... and their destructive versions
 (defmethod interval-add ((interval interval) (x real))
   (with-interval-bounds (s e si ei) interval
     (make-interval (+ s x) (+ e x) (cons si ei))))

@@ -216,9 +216,10 @@
    #:make-interval
    #:with-interval-bounds
    #:interval-from-number
+   #:interval-intersect-p
    #:interval-intersection
    #:interval-union
-   #:interval-contains
+   #:interval-contains-p
    #:interval-equal
    #:interval-cardinal
    #:interval-complement
@@ -226,6 +227,7 @@
    #:interval-addf
    #:interval-sub
    #:interval-subf
+   #:interval-empty-p
    ;; Macros
    #:with-gensyms
    #:do-array
