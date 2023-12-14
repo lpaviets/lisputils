@@ -127,13 +127,17 @@ FROM and IN are strings, that will be upcased."
 (defpackage #:org.numbra.perso.algo
   (:use #:cl #:org.numbra.perso.ds #:org.numbra.perso.utils)
   (:export
+   ;; Graphs
    #:shortest-path
    #:shortest-path-dec-key
    #:a-star
    #:dfs
    #:bfs
    #:shortest-path-all-to-all
-   #:connected-components))
+   #:connected-components
+   ;; Iteration, dynamical system, cycles
+   #:find-cycle-dynamical-system
+   #:iterate-dynamical-system))
 
 (defpackage #:org.numbra.perso
   (:use #:cl
