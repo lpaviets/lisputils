@@ -57,24 +57,6 @@ Otherwise, elements that are not X nor Y are mapped to Y"
                        (cons (car list) x))
                      (sublists-length (cdr list) (1- n)))))))
 
-(defun neighbours (i j array &key diagonal self)
-  "List of positions of the neighbours of (I J) in ARRAY
-If DIAGONAL is non-nil, includes the diagonally adjacent neighbours
-If SELF is non-nil, include (I J) too"
-  (let (neighbours)
-    (dotimes (x 3)
-      (dotimes (y 3)
-        (let ((next-x (1- (+ x i)))
-              (next-y (1- (+ y j))))
-          (when (and (or (not (= x y 1)) self)
-                     (and (or diagonal
-                              (= next-x i)
-                              (= next-y j)))
-                     (array-in-bounds-p array next-x next-y))
-            (push (list next-x next-y)
-                  neighbours)))))
-    neighbours))
-
 (defgeneric argmax (sequence &key test start end key exclude-null)
   (:documentation "Returns OBJ maximizing TEST in SEQUENCE between START and END.
 If END is NIL, search it until the end of the sequence.
@@ -157,14 +139,23 @@ If SEQUENCE is empty, return NIL for all three values"))
         :for max-elt = x :then (if replace-max-p x max-elt)
         :finally (return (values max-elt nil max-val))))
 
-(defun %array-inverse-row-major-index (array index)
-  (let ((dims (reverse (array-dimensions array)))
-        (res ())
-        rem)
-    (dolist (d dims)
-      (multiple-value-setq (index rem) (truncate index d))
-      (push rem res))
-    res))
+;; From Serapeum
+(defun array-index-row-major (array row-major-index)
+  "The inverse of ARRAY-ROW-MAJOR-INDEX.
+
+Given an array and a row-major index, return a list of subscripts.
+
+     (apply #'aref (array-index-row-major i))
+     ≡ (array-row-major-aref i)"
+  (labels ((rec (subs dims)
+             (if (null dims) subs
+                 (multiple-value-bind (q r)
+                     (truncate (car subs)
+                               (the (integer 0 #.array-dimension-limit)
+                                    (car dims)))
+                   (rec (cons q (rplaca subs r))
+                        (cdr dims))))))
+    (rec (list row-major-index) (reverse (rest (array-dimensions array))))))
 
 (defmethod argmax ((sequence array) &key (test #'<) (start 0) end key exclude-null)
   (assert (and (or (null start) (zerop start))
@@ -175,7 +166,7 @@ START has to be NIL or 0 instead of ~S~@
 and END has to be NIL instead of ~S~%"
           start end)
   (loop :with length = (array-total-size sequence)
-        :with max-idx = (make-list (array-rank sequence) :initial-element 0)
+        :with max-idx = 0
         :with max-elt = (row-major-aref sequence 0)
         :with max-val = (if key
                             (funcall key max-elt)
@@ -194,7 +185,7 @@ and END has to be NIL instead of ~S~%"
                     max-idx idx)
         :finally
            (return (values max-elt
-                           (%array-inverse-row-major-index sequence max-idx)
+                           (array-index-row-major sequence max-idx)
                            max-val))))
 
 (defun argmin (sequence &key (test #'<) (start 0) end key exclude-null)
@@ -263,21 +254,3 @@ The function works by calling `argmax' with [argmax]TEST bound to
                        :end end)))
     (reduce #'subs alist
             :initial-value sequence)))
-
-;; From Serapeum
-(defun array-index-row-major (array row-major-index)
-  "The inverse of ARRAY-ROW-MAJOR-INDEX.
-
-Given an array and a row-major index, return a list of subscripts.
-
-     (apply #'aref (array-index-row-major i))
-     ≡ (array-row-major-aref i)"
-  (labels ((rec (subs dims)
-             (if (null dims) subs
-                 (multiple-value-bind (q r)
-                     (truncate (car subs)
-                               (the (integer 0 #.array-dimension-limit)
-                                    (car dims)))
-                   (rec (cons q (rplaca subs r))
-                        (cdr dims))))))
-    (rec (list row-major-index) (reverse (rest (array-dimensions array))))))

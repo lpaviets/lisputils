@@ -22,7 +22,6 @@ FROM and IN are strings, that will be upcased."
    #:do-hashkeys
    #:do-hashvalues
    #:dotimes-product
-   #:neighbours
    #:flip
    #:range
    #:lazy-range
@@ -122,7 +121,16 @@ FROM and IN are strings, that will be upcased."
    #:interval-add
    #:interval-addf
    #:interval-sub
-   #:interval-subf))
+   #:interval-subf
+   ;; Grids
+   #:grid-pos-in-direction
+   #:grid-valid-pos-p
+   #:grid-opposite-direction
+   #:grid-height
+   #:grid-width
+   #:grid-rotate
+   #:grid-neighbours
+   #:grid-print))
 
 (defpackage #:org.numbra.perso.algo
   (:use #:cl #:org.numbra.perso.ds #:org.numbra.perso.utils)

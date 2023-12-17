@@ -32,10 +32,18 @@ same type as SOURCE and TARGET), and return a list of cons cells,
 whose car is an adjacent vertex and whose cdr is the edge's weight.
 For example:
 (funcall EDGES SOURCE) -> ((u1 . w1) (u2 . w2)) ... (un . wn))
-where the ui's are exactly the vertices adjacent to SOURCE."
+where the ui's are exactly the vertices adjacent to SOURCE.
+
+TARGET can also be a function of one argument, a vertex, returning T
+if this vertex is a possible target."
   (let  ((distance (make-hash-table :test test))
          (queue (heap:make-heap #'< :key #'cdr))
-         (parent (make-hash-table :test test)))
+         (parent (make-hash-table :test test))
+         (target-p (if (functionp target)
+                       (lambda (v)
+                         (funcall target v))
+                       (lambda (v)
+                         (funcall test v target)))))
     (loop
       :initially
          (setf (gethash source distance) 0)
@@ -55,9 +63,10 @@ where the ui's are exactly the vertices adjacent to SOURCE."
                        (setf (gethash other distance) other-new-dist)
                        (heap:heap-push (cons other other-new-dist) queue)
                        (setf (gethash other parent) vertex))
-      :until (funcall test vertex target)
-      :finally (return (values (gethash target distance)
-                               parent)))))
+      :until (funcall target-p vertex)
+      :finally (return (values (gethash vertex distance)
+                               parent
+                               vertex)))))
 
 (defmethod shortest-path ((edges array) (source integer) (target integer) &key (test 'eql))
   "EDGES is given as a 2D array, representing the adjacency matrix of the graph

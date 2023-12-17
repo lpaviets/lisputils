@@ -20,6 +20,7 @@
                (:file "intervals")
                (:file "union-find")
                (:file "algorithms")
+               (:file "grids")
                (:file "parsing")
                (:file "printing")
                (:module "extras"
