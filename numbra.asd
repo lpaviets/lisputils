@@ -21,6 +21,7 @@
                (:file "union-find")
                (:file "algorithms")
                (:file "grids")
+               (:file "periods")
                (:file "parsing")
                (:file "printing")
                (:module "extras"
