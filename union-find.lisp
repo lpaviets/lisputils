@@ -50,7 +50,7 @@ already present"
                      (lambda (item)
                        (add-to-partition partition item))
                      items))
-      (hash-table (org.numbra.perso.utils:do-hashkeys (item items)
+      (hash-table (utils:do-hashkeys (item items)
                     (add-to-partition partition item))))
     partition))
 
@@ -101,7 +101,7 @@ distinct equivalence classes in ITEMS."
         (result (make-hash-table :test test)))
     (loop :for (x . y) :in base
           :do (uf-union partition x y))
-    (org.numbra.perso.utils::do-hash (x wrapped-x (partition-elements partition))
+    (utils:do-hash (x wrapped-x (partition-elements partition))
       (let ((repr (uf-item (uf-parent wrapped-x))))
         (if (gethash repr result)
             (push x (gethash repr result))

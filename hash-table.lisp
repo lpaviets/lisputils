@@ -39,15 +39,30 @@ If VALUE is non-nil, compare the table values instead of its keys."
     counter))
 
 (defun ht-count-if (predicate table &key key value)
+  "Count the elements of TABLE satisfying PREDICATE.
+
+If VALUE is NIL, iterate over the keys. Otherwise, iterate over the
+values of TABLE.
+
+Predicate is called with each element (key or value) directly, or with
+(FUNCALL KEY ELEMENT) if KEY is non-NIL."
   (let ((counter 0))
     (maphash (lambda (k v)
                (let ((x (if value v k)))
-                (when (funcall predicate (if key (funcall key x) x))
-                  (incf counter))))
+                 (when (funcall predicate (if key (funcall key x) x))
+                   (incf counter))))
              table)
     counter))
 
 (defun ht-from-sequence (seq &key (test 'eql) key (start 0) end value)
+  "Create a hash-table from sequence SEQ. The hash-table test is set to
+TEST.
+
+The keys of the hash-table are the elements of SEQ between positions
+START and END, or (FUNCALL KEY ELEMENT) if KEY is non-NIL.
+
+If VALUE is NIL, all the keys of the hash-table are set to T.
+Otherwise, the value associated to ELEMENT is (FUNCALL VALUE ELEMENT)."
   (let ((table (make-hash-table :test test)))
     (reduce (lambda (ign x)
               (declare (ignore ign))
