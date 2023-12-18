@@ -42,5 +42,7 @@
                               :if-exists :error
                               :if-does-not-exist :create)
                (format s "(in-package #:~(~A~))~%~%" (year-day-to-package year day))
+               (format s "(defparameter *input* \"../inputs/input~2D\")~%~%" day)
+               (format s "(defparameter *test* \"../inputs/test~2D\")~%~%" day)
                (format s "(defun answer-ex-~a-1 ())~%~%" day)
                (format s "(defun answer-ex-~a-2 ())~%~%" day))))

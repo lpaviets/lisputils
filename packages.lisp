@@ -25,6 +25,7 @@ FROM and IN are strings, that will be upcased."
    #:flip
    #:range
    #:lazy-range
+   #:manhattan-distance
    #:permutations
    #:sublists-length
    #:array-index-row-major
@@ -37,7 +38,9 @@ FROM and IN are strings, that will be upcased."
    #:for
    #:make-iterable
    #:do-subsets
-   #:do-sequence-subsets))
+   #:do-sequence-subsets
+   #:lexicographic<
+   #:group-by))
 
 (defpackage #:org.numbra.perso.io
   (:use #:cl)
@@ -130,7 +133,10 @@ FROM and IN are strings, that will be upcased."
    #:grid-width
    #:grid-rotate
    #:grid-neighbours
-   #:grid-print))
+   #:grid-print
+   #:grid-border-length
+   #:grid-area-euclidean
+   #:grid-area-lattice))
 
 (defpackage #:org.numbra.perso.algo
   (:use #:cl #:org.numbra.perso.ds #:org.numbra.perso.utils)

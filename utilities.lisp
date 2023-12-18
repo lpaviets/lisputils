@@ -33,6 +33,11 @@ Otherwise, elements that are not X nor Y are mapped to Y"
           default
           (prog1 i (incf i step))))))
 
+(defun manhattan-distance (x y)
+  "X and Y are lists of length 2, representing positions."
+  (+ (abs (- (car y) (car x)))
+     (abs (- (cadr y) (cadr x)))))
+
 (defun permutations (n)
   "List of all the permutations of the integers between 0 and n included"
   (if (zerop n)
@@ -254,3 +259,42 @@ The function works by calling `argmax' with [argmax]TEST bound to
                        :end end)))
     (reduce #'subs alist
             :initial-value sequence)))
+
+(defun lexicographic< (seq1 seq2 &optional (predicate #'<))
+  (let ((seq1 (coerce seq1 'list))
+        (seq2 (coerce seq2 'list)))
+    (loop :for (a . rest1) :on seq1
+          :for (b . rest2) :on seq2
+          :when (funcall predicate b a)
+            :do (return nil)
+          :when (funcall predicate a b)
+            :do (return t)
+          :finally (return (if rest2 t nil)))))
+
+
+(defun group-by (sorted-list &key key (test 'eql))
+  "Group the elements of SORTED-LIST.
+
+Returns a list of lists. Each sublist contains the largest subsequence
+of SORTED-LIST for which all elements are equal under TEST.
+
+If KEY is non-NIL, it is called on each element before comparing with
+TEST.
+
+The relative order of the elements is preserved. In particular, we have
+
+SORTED-LIST == (reduce 'append (group-by SORTED-LIST))
+
+under EQUALP, regardless of KEY and TEST."
+  (loop :with acc = (list (car sorted-list))
+        :for (p1 p2) :on sorted-list
+        :for e1 = (if key (funcall key p1) p1)
+        :for e2 = (when p2 (if key (funcall key p2) p2))
+        :while p2
+        :if (funcall test e1 e2)
+          :do (push p2 acc)
+        :else
+          :collect (nreverse acc)
+          :and :do (setf acc (list p2))
+        :unless p2
+          :collect acc))

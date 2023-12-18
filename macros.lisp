@@ -40,14 +40,20 @@ X is bound the array[i][j] := (aref array i j)"
       ,return)))
 
 (defmacro do-line ((i j &key (step 1)) (x1 y1) (x2 y2) &body body)
-  "Iterate over a line, given as a pair of coordinates
-In BODY, I and J are bound to the horizontal and vertical coordinate of each
-step respectively. They are incremented by STEP at each step, in the right
-direction.
+  "Iterate over a line, given as a pair of coordinates. Both extremal
+points are *included* in the loop.
+
+In BODY, I and J are bound to the horizontal and vertical coordinate
+of each step respectively. They are incremented by STEP at each step,
+in the right direction.
+
 Some caveats:
-- Only works if the line is \"straight\" or diagonal. Otherwise, loop infinitely.
-- Loop infinitely if the STEP does not 'divide' the distance between the starting
-point and the ending point."
+
+- Only works if the line is \"straight\" or diagonal. Otherwise, loop
+  infinitely.
+
+- Loop infinitely if the STEP does not 'divide' the distance between
+the starting point and the ending point."
   (with-gensyms ((gx1 x1)
                  (gx2 x2)
                  (gy1 y1)

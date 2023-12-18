@@ -17,13 +17,13 @@
 
 (in-package #:org.numbra.perso.ds)
 
-(defun grid-pos-in-direction (pos dir)
+(defun grid-pos-in-direction (pos dir &optional (n 1))
   (destructuring-bind (x y) pos
     (ecase dir
-      (:up    (list (1- x) y))
-      (:down  (list (1+ x) y))
-      (:left  (list x (1- y)))
-      (:right (list x (1+ y))))))
+      (:up    (list (- x n) y))
+      (:down  (list (+ x n) y))
+      (:left  (list x (- y n)))
+      (:right (list x (+ y n))))))
 
 (defun grid-valid-pos-p (pos grid)
   (array-in-bounds-p grid (first pos) (second pos)))
@@ -95,3 +95,37 @@ If SELF is non-nil, includes POS too."
               (push (list next-x next-y)
                     neighbours))))))
     neighbours))
+
+(defun grid-border-length (corners)
+  (loop :with start = (car corners)
+        :for (p1 p2) :on corners
+        :if p2
+          :sum (utils:manhattan-distance p1 p2)
+        :else
+          :sum (utils:manhattan-distance start p1)))
+
+(defun grid-area-euclidean (corners)
+  "Returns the (euclidean) unsigned area of the polygon whose corners are
+given by CORNERS, in this order.
+
+Uses the \"shoelace formula\" internally."
+  (abs (/ (loop :with (xs ys) = (car corners)
+                :for ((xi yi) (xi+1 yi+1)) :on corners
+                :unless xi+1
+                  :do (setf xi+1 xs
+                            yi+1 ys)
+                :sum (- (* xi yi+1) (* xi+1 yi)))
+          2)))
+
+(defun grid-area-lattice (corners)
+  "Returns the unsigned area of the polygon whose corners are given by
+CORNERS, in this order. The area here is defined as the numbers of
+integer points that either belong to the \"border\" of the polygon, or
+are inside it.
+
+This function assumes that CORNERS correspond to an axis-aligned
+polygon, i.e. two consecutive corners are either horizontally or
+vertically aligned.
+
+This uses the shoelace-formula and the Pick's theorem."
+  (+ 1 (grid-area-euclidean corners) (truncate (grid-border-length corners) 2)))
