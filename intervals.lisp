@@ -74,7 +74,7 @@ included in the interval."))
           (high (if ei1
                     (floor e1)
                     (ceiling (1- e1)))))
-      (1+ (- high low)))))
+      (max 0 (1+ (- high low))))))
 
 (defun interval-intersect-p (interval-1 interval-2)
   (with-interval-bounds (s1 e1 si1 ei1) interval-1
@@ -141,9 +141,10 @@ corresponding to the complement of INTERVAL-1 within INTERVAL-2."
     (with-interval-bounds (s2 e2 si2 ei2) interval-2
       (let ((low  (make-interval s2 s1 (cons si2 (not si1))))
             (high (make-interval e1 e2 (cons (not ei1) ei2))))
-        (remove-if 'interval-empty-p (list
-                                      (%interval-intersection interval-2 low)
-                                      (%interval-intersection interval-2 high)))))))
+        (remove-if 'interval-empty-p
+                   (remove nil (list
+                                (%interval-intersection interval-2 low)
+                                (%interval-intersection interval-2 high))))))))
 
 ;;; Arithmetic operations: add, sub ... and their destructive versions
 (defmethod interval-add ((interval interval) (x real))
