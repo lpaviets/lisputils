@@ -50,10 +50,10 @@
 (defmacro do-subsets ((x (k n &optional result) &optional bits-to-subset-fun) &body body)
   "Iterate over subsets of size K of a set of N elements.
 
-In BODY, X is either bound to an integer, whose non-zero bits
-correspond to the chosen K elements of the set of size N.
+In BODY, X is bound to an integer, whose non-zero bits correspond to
+the chosen K elements of the set of size N.
 
-BITS-TO-SUBSET-FUN should be a function of one argument. If non-nil, X
+BITS-TO-SUBSET-FUN should be a function of one argument. If non-NIL, X
 is bound to the result of this called on the previously-explained
 number instead.
 

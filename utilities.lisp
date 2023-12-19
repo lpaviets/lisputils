@@ -34,9 +34,10 @@ Otherwise, elements that are not X nor Y are mapped to Y"
           (prog1 i (incf i step))))))
 
 (defun manhattan-distance (x y)
-  "X and Y are lists of length 2, representing positions."
-  (+ (abs (- (car y) (car x)))
-     (abs (- (cadr y) (cadr x)))))
+  "X and Y are lists, representing positions."
+  (loop :for i :in x
+        :for j :in y
+        :sum (abs (- i j))))
 
 (defun permutations (n)
   "List of all the permutations of the integers between 0 and n included"

@@ -22,6 +22,16 @@ included in the interval."))
                  :end end
                  :includedp includedp))
 
+(defun interval-bounds (interval)
+  "Return a cons cell (START . END) representing the two
+bounds of the interval.
+
+As a secondary value, return a cons cell
+(INCLUDED-START . INCLUDED-END) of boolean values, representing
+whether or not the corresponding bound is included in the interval."
+  (values (cons (start interval) (end interval))
+          (copy-list (includedp interval))))
+
 (defmacro with-interval-bounds ((start end &optional start-included-p end-included-p)
                                 interval &body body)
   (utils:with-gensyms ((ginterval interval))

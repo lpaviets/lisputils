@@ -112,6 +112,7 @@ FROM and IN are strings, that will be upcased."
    ;; Intervals
    #:interval
    #:make-interval
+   #:interval-bounds
    #:with-interval-bounds
    #:interval-from-number
    #:interval-intersection
