@@ -1,7 +1,7 @@
 ;;; numbra:
 ;;; Queue
 
-(in-package #:org.numbra.perso.ds)
+(in-package #:org.numbra.perso.ds.queue)
 
 
 ;;;; Idea: the queue is simply a list, stored in HEAD

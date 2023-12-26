@@ -26,23 +26,78 @@
 ;;; Only run this code once, in the directory in which you want to code
 ;;; It creates a whole lot of files, filled with some code
 
-(defun create-files-templates (year)
+(defun ex-name (day)
+  (format nil "ex~2,'0D" day))
+
+(defun create-files-sources (year)
   (loop :initially (let ((src-dir (make-pathname :directory '(:relative "src"))))
                      (ensure-directories-exist src-dir))
         :for day :from 1 :to 25
-        :for filename = (make-pathname :directory '(:relative "src")
-                                       :name (format nil "ex~a" day)
+        :for day-str = (ex-name day)
+        :for dirname = (make-pathname :directory `(:relative "src" ,day-str))
+        :for filename = (make-pathname :directory `(:relative "src" ,day-str)
+                                       :name day-str
                                        :type "lisp")
+        :do (ensure-directories-exist dirname)
         :unless (probe-file filename)
           :do
-             (format t "Creating file ~a~%" filename)
+             (format t "Creating file ~A~%" filename)
              (with-open-file (s
                               filename
                               :direction :output
                               :if-exists :error
                               :if-does-not-exist :create)
-               (format s "(in-package #:~(~A~))~%~%" (year-day-to-package year day))
-               (format s "(defparameter *input* \"../inputs/input~2D\")~%~%" day)
-               (format s "(defparameter *test* \"../inputs/test~2D\")~%~%" day)
+               (format s "(in-package #:~(~A~))~%~%"
+                       (year-day-to-package year day))
+               (format s "(defparameter *input* \"input\")~%")
+               (format s "(defparameter *test* \"test\")~%~%")
                (format s "(defun answer-ex-~a-1 ())~%~%" day)
                (format s "(defun answer-ex-~a-2 ())~%~%" day))))
+
+
+(defun create-file-packages (year)
+  (let ((filename (make-pathname :name "packages" :type "lisp")))
+    (unless (probe-file filename)
+      (format t "Creating file ~a~%" filename)
+      (with-open-file (s
+                       filename
+                       :direction :output
+                       :if-exists :error
+                       :if-does-not-exist :create)
+        (format s ";;;; Packages.lisp~%")
+        (format s "(org.numbra.perso.aoc:gen-packages ~A)" year)))))
+
+(defun create-file-asd (year)
+  (let ((filename (make-pathname :name (format nil "aoc~A" year)
+                                 :type "asd"))
+        (register-module (lambda (day)
+                           (let ((name (ex-name day)))
+                             (list :module (read-from-string name)
+                                   :pathname name
+                                   :components
+                                   `((:file ,name)))))))
+    (unless (probe-file filename)
+      (format t "Creating file ~a~%" filename)
+      (with-open-file (s
+                       filename
+                       :direction :output
+                       :if-exists :error
+                       :if-does-not-exist :create)
+        (format s ";;;; Packages.lisp")
+        (let ((*print-case* :downcase))
+          (pprint
+           `(asdf:defsystem ,(read-from-string (format nil "#:aoc~A" year))
+              :serial t
+              :depends-on (#:numbra)
+              :components ((:file "packages")
+                           (:module src
+                            :pathname "src"
+                            :components ,(loop :for day :from 1 :to 25
+                                               :collect
+                                               (funcall register-module day)))))
+           s))))))
+
+(defun create-files-templates (year)
+  (create-files-sources year)
+  (create-file-packages year)
+  (create-file-asd year))

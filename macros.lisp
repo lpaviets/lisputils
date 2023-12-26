@@ -31,13 +31,13 @@ In the BODY:
 I, J are respectively bound to the first and second coordinate at each step
 X is bound the array[i][j] := (aref array i j)"
   (with-gensyms ((garray array))
-   `(progn
-      (loop :for ,i :below (array-dimension ,garray 0)
-            :do
-               (loop :for ,j :below (array-dimension ,garray 1)
-                     :for ,x = (aref ,garray ,i ,j)
-                     :do ,@body))
-      ,return)))
+    `(progn
+       (loop :for ,i :below (array-dimension ,garray 0)
+             :do
+                (loop :for ,j :below (array-dimension ,garray 1)
+                      :for ,x = (aref ,garray ,i ,j)
+                      :do ,@body))
+       ,return)))
 
 (defmacro do-line ((i j &key (step 1)) (x1 y1) (x2 y2) &body body)
   "Iterate over a line, given as a pair of coordinates. Both extremal

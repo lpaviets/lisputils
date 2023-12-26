@@ -15,15 +15,26 @@
 ;;;
 ;;; - The upper-left corner in (0, 0)
 
-(in-package #:org.numbra.perso.ds)
+(in-package #:org.numbra.perso.ds.grid)
 
-(defun grid-pos-in-direction (pos dir &optional (n 1))
+(defvar *directions* '(:up :down :left :right))
+(defvar *diagonals*  '(:upright :upleft :downright :downleft))
+(defvar *all-directions* (append *directions* *diagonals*))
+
+(defun grid-at (pos grid)
+  (aref grid (first pos) (second pos)))
+
+(defun grid-pos-in-direction (pos dir &key (steps 1))
   (destructuring-bind (x y) pos
     (ecase dir
-      (:up    (list (- x n) y))
-      (:down  (list (+ x n) y))
-      (:left  (list x (- y n)))
-      (:right (list x (+ y n))))))
+      (:up    (list (- x steps) y))
+      (:down  (list (+ x steps) y))
+      (:left  (list x (- y steps)))
+      (:right (list x (+ y steps)))
+      (:upright   (list (- x steps) (+ y steps)))
+      (:upleft    (list (- x steps) (- y steps)))
+      (:downright (list (+ x steps) (+ y steps)))
+      (:downleft  (list (+ x steps) (- y steps))))))
 
 (defun grid-valid-pos-p (pos grid)
   (array-in-bounds-p grid (first pos) (second pos)))
@@ -33,7 +44,11 @@
     (:up    :down)
     (:down  :up)
     (:left  :right)
-    (:right :left)))
+    (:right :left)
+    (:upright   :downleft)
+    (:upleft    :downright)
+    (:downright :upleft)
+    (:downleft  :upright)))
 
 (defun grid-height (grid)
   (array-dimension grid 0))
@@ -42,8 +57,9 @@
   (array-dimension grid 1))
 
 (defun grid-print (grid)
-  (let ((len (nth-value 2 (utils:argmax grid :key (lambda (x)
-                                                    (length (write-to-string x)))))))
+  (let ((len (nth-value 2 (utils:argmax grid
+                                        :key (lambda (x)
+                                               (length (write-to-string x)))))))
     (loop :for i :below (grid-height grid) :do
       (loop :for j :below (grid-width grid) :do
         (format t "~vA" (if (<= len 1) 0 (1+ len)) (aref grid i j)))
@@ -75,26 +91,44 @@ The grid is modified. An error is signaled if GRID is not a square."
                                      (aref grid j aux-1)))))
     grid))
 
-(defun grid-neighbours (pos grid &key diagonal self)
-  "List of positions of the neighbours of POS in GRID.
+(defun %grid-torus-wrap (pos grid)
+  (loop :for x :in pos
+        :for d :in (array-dimensions grid)
+        :collect (mod x d)))
+
+(defun grid-neighbours (pos grid &key diagonal self walls (test #'eql) key torus)
+  "List of positions of the neighbours of POS in GRID. This assumes that
+POS is a valid position of GRID.
 
 If DIAGONAL is non-nil, includes the diagonally adjacent neighbours.
 
-If SELF is non-nil, includes POS too."
-  (let (neighbours)
-    (destructuring-bind (i j) pos
-      (dotimes (x 3)
-        (dotimes (y 3)
-          (let ((next-x (1- (+ x i)))
-                (next-y (1- (+ y j))))
-            (when (and (or (not (= x y 1)) self)
-                       (and (or diagonal
-                                (= next-x i)
-                                (= next-y j)))
-                       (array-in-bounds-p grid next-x next-y))
-              (push (list next-x next-y)
-                    neighbours))))))
-    neighbours))
+If SELF is non-nil, includes POS too.
+
+When WALLS is non-NIL, it is used to filter the list of neighbours.
+That is, (I J) is not included in the return list if (AREF GRID I J)
+is equal to WALLS, as tested by TEST.
+
+If KEY is non-NIL, use it on (AREF GRID I J) before comparing it to
+WALLS.
+
+If TORUS is non-NIL, view GRID as a torus. This means that e.g. the
+neighbour in direction :UP of the position (0 Y) becomes (H Y), where
+H is the maximal row of the grid."
+  (loop :for dir :in (if diagonal *all-directions* *directions*)
+        :for next = (grid-pos-in-direction pos dir)
+        :for wrapped = (if torus (%grid-torus-wrap next grid) next)
+        :when (and (grid-valid-pos-p wrapped grid)
+                   (or (not walls)
+                       (not (funcall test
+                                     (grid-at wrapped grid)
+                                     (if key (funcall key walls) walls)))))
+          :collect wrapped :into neighbours
+        :finally (return-from grid-neighbours
+                   (remove-duplicates
+                    (if self
+                        (cons (copy-seq pos) neighbours)
+                        neighbours)
+                    :test #'equal))))
 
 (defun grid-border-length (corners)
   (loop :with start = (car corners)
@@ -129,3 +163,33 @@ vertically aligned.
 
 This uses the shoelace-formula and the Pick's theorem."
   (+ 1 (grid-area-euclidean corners) (truncate (grid-border-length corners) 2)))
+
+(defun grid-apply-as-sequence (grid function &rest args)
+  "Apply FUNCTION to ARGS with GRID viewed as a (one-dimensional)
+sequence.
+
+In ARGS, the special keyword :% is used to denote the positions at
+which the GRID should be inserted in the arguments list.
+
+For example:
+
+(GRID-APPLY-AS-SEQUENCE #'POSITION GRID ITEM :% :TEST #'EQUAL)
+
+is equivalent to
+
+(POSITION ITEM GRID-SEQ :TEST #'EQUAL)
+
+where GRID-SEQ is a \"view\" on GRID as if it was a sequence.
+
+As a special case, if no :% symbol is present in ARGS, GRID is used as
+the SECOND argument instead. This is because most sequence functions
+take the sequence as a 2nd argument, e.g. FIND or MAP. If ARGS is NIL,
+then it is used as the first argument."
+  (let* ((view (make-array (array-total-size grid) :displaced-to grid))
+         (new-args (cond
+                     ((member :% args) (substitute view :% args))
+                     ((endp args) (list view))
+                     (t (list* (first args)
+                               view
+                               (cdr args))))))
+    (apply function new-args)))

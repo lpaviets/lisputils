@@ -1,7 +1,7 @@
 ;;; numbra:
 ;;; Interval
 
-(in-package #:org.numbra.perso.ds)
+(in-package #:org.numbra.perso.ds.interval)
 
 ;;;; FIXME BUG probably in with-gensym ?
 ;;;; Nested calls to with-interval-bounds use twice the same symbol

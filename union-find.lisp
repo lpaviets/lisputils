@@ -1,7 +1,7 @@
 ;; numbra
 ;; Union-find
 
-(in-package #:org.numbra.perso.ds)
+(in-package #:org.numbra.perso.ds.uf)
 
 ;; Union-find
 (defclass uf-wrapper ()

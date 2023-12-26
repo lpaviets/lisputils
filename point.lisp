@@ -1,4 +1,4 @@
-(in-package #:org.numbra.perso.ds)
+(in-package #:org.numbra.perso.ds.point)
 
 (defclass point ()
   ((x :accessor point-x :initarg :x)

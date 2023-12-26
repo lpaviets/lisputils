@@ -1,7 +1,7 @@
 ;;; numbra:
 ;;; Hash-table
 
-(in-package #:org.numbra.perso.ds)
+(in-package #:org.numbra.perso.ds.ht)
 
 (defun ht-create (&rest args)
   "Create a hash-table using ARGS as keys and values.
@@ -21,10 +21,40 @@ secondary return value, also return the value associated to it in
 TABLE."
   (let (rk rv)
     (block nil
-      (maphash (lambda (k v) (setf rk k rv v)) table)
+      ;; Weird hack: we access any element using maphash but we stop
+      ;; the mapping at the first iteration using a RETURN /outside/
+      ;; the MAP form.
+      (maphash (lambda (k v)
+                 (setf rk k
+                       rv v))
+               table)
       (return))
     (remhash rk table)
     (values rk rv)))
+
+(defun ht-merge (value-test hash-table &rest hash-tables)
+  "Returns a fresh hash-table containing all the keys of
+all the HASH-TABLES given as arguments, including HASH-TABLE. All the
+arguments must have the same hash-table-test.
+
+If a key appears in two or more hash-tables, it must be associated to
+the same value, as tested by VALUE-TEST."
+  (loop :with new-table = (make-hash-table :test (hash-table-test hash-table)
+                                           :size (hash-table-size hash-table))
+        :with test = (hash-table-test new-table)
+        :for table :in (cons hash-table hash-tables)
+        :unless (eq test (hash-table-test table))
+          :do (error "Hash-tables ~A, ~A have different HASH-TABLE-TEST"
+                     hash-table table)
+        :do (utils:do-hash (x v table)
+              (multiple-value-bind (prev found)
+                  (gethash x new-table)
+                (cond
+                  ((not found) (setf (gethash x new-table) v))
+                  ((and found (funcall value-test prev v)) t)
+                  (t (error "Key ~A is associated to different values ~A and ~A"
+                            x prev v)))))
+        :finally (return new-table)))
 
 (defun ht-count (item table &key key (test 'eql) value)
   "Return the number of entries in TABLE satisfying a test with ITEM,
@@ -73,3 +103,31 @@ Otherwise, the value associated to ELEMENT is (FUNCALL VALUE ELEMENT)."
             :end end
             :initial-value t)
     table))
+
+(defun ht-from-plist (list &key (test 'eql) key)
+  "Create a hash-table from LIST. The hash-table test is set to TEST.
+
+LIST is understood to be a property-list: elements are grouped by
+pairs, the first one being the key and the second one being the value.
+
+For example, (HT-FROM-PLIST '(x 3 y 4)) will return a hash-table of
+count 2, where the keys X and Y are respectively associated to the
+values 3 and 4.
+
+When KEY is non-NIL, it is a function of one argument, taking the keys
+of the hash-table as input. In that case, the result of calling KEY on
+the keys of the plist LIST are inserted in the hash-table, rather than
+the elements themselves.
+
+For example,
+
+(HT-FROM-PLIST '(x 3 y 4) :test #'equalp :key 'symbol-name)
+
+will return a hash-table of count 2, where the keys are now the
+string\"X\" and \"Y\" rather than symbols. In particular, the TEST
+can not be meaningfully left to EQL."
+
+  (loop :with table = (make-hash-table :test test)
+        :for (k v) :on list :by #'cddr
+        :do (setf (gethash (if key (funcall key k) k) table) v)
+        :finally (return table)))

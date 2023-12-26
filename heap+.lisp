@@ -23,7 +23,7 @@
 ;;;; under the License.
 ;;;;
 
-(in-package #:org.numbra.perso.ds)
+(in-package #:org.numbra.perso.ds.heap)
 
 ;;; ----------------------------------------------------
 
