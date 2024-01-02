@@ -1,13 +1,17 @@
 (in-package #:org.numbra.perso.utils)
 
 (defmacro for ((var-or-vars sequence) &body body)
-  "Iterate through SEQUENCE, binding VAR-OR-VARS to its successive elements.
+  "Iterate through SEQUENCE, binding VAR-OR-VARS to its successive
+elements.
 
-If VAR-OR-VARS is a symbol, it is bound as if by LET to those elements.
+If VAR-OR-VARS is a symbol, it is bound as if by LET to those
+elements.
 
-If it is a (possibly nested) list, VAR-OR-VARS is bound as if by DESTRUCTURING-BIND.
+If it is a (possibly nested) list, VAR-OR-VARS is bound as if by
+DESTRUCTURING-BIND.
 
-BODY is then executed at each step, with VAR-OR-VARS bound as described.
+BODY is then executed at each step, with VAR-OR-VARS bound as
+described.
 
 Within BODY, the keyword BREAK stops the execution of the loop, and
 the keyword CONTINUE stops this iteration and continues with the next

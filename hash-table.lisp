@@ -5,10 +5,15 @@
 
 (defun ht-create (&rest args)
   "Create a hash-table using ARGS as keys and values.
+
 If ARGS is of even length, the even-indexed elements are used as keys,
 and the odd-indexed ones as values, alternatively.
+
 If ARGS is of odd length, its first element is used as the :TEST argument
-to MAKE-HASH-TABLE"
+to MAKE-HASH-TABLE.
+
+See also `ht-from-plist' for another way to create hash-tables from a
+variable number of pairs."
   (let* ((test (when (oddp (length args)) (pop args)))
          (table (make-hash-table :test (or test 'eql))))
     (loop :for (key val) :on args :by #'cddr
@@ -125,7 +130,10 @@ For example,
 
 will return a hash-table of count 2, where the keys are now the
 string\"X\" and \"Y\" rather than symbols. In particular, the TEST
-can not be meaningfully left to EQL."
+can not be meaningfully left to EQL.
+
+See also `ht-create' for another way to create hash-tables from a
+variable number of pairs."
 
   (loop :with table = (make-hash-table :test test)
         :for (k v) :on list :by #'cddr

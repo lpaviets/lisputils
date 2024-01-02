@@ -21,8 +21,35 @@
 (defvar *diagonals*  '(:upright :upleft :downright :downleft))
 (defvar *all-directions* (append *directions* *diagonals*))
 
+;; (defclass grid ()
+;;   ((content :initarg :content :accessor grid-content)))
+
+;; (defclass square-grid (grid)
+;;   ())
+
+;; (defclass sparse-grid (grid)
+;;   ((default :initarg :default :accessor grid-default
+;;             :documentation
+;;             "Default value for valid grid positions that are not stored.")))
+
+;; (defclass periodic-grid (grid)
+;;   ((grid-period :initarg :period :reader grid-period)
+;;    (occupied :initform (make-instance 'sparse-grid) :reader grid-occupied)))
+
+;; (defgeneric grid-at (grid))
+;; (defgeneric (setf grid-at) (grid))
+;; (defgeneric grid-height (grid))
+;; (defgeneric grid-width (grid))
+;; (defgeneric grid-valid-pos-p (pos grid)
+;;   (:method (pos (grid grid))
+;;     (and (<= 0 (first pos) (1- (grid-height grid)))
+;;          (<= 0 (second pos) (1- (grid-width grid))))))
+
 (defun grid-at (pos grid)
   (aref grid (first pos) (second pos)))
+
+(defun (setf grid-at) (val pos grid)
+  (setf (aref grid (first pos) (second pos)) val))
 
 (defun grid-pos-in-direction (pos dir &key (steps 1))
   (destructuring-bind (x y) pos
@@ -56,14 +83,19 @@
 (defun grid-width (grid)
   (array-dimension grid 1))
 
-(defun grid-print (grid)
-  (let ((len (nth-value 2 (utils:argmax grid
-                                        :key (lambda (x)
-                                               (length (write-to-string x)))))))
-    (loop :for i :below (grid-height grid) :do
-      (loop :for j :below (grid-width grid) :do
-        (format t "~vA" (if (<= len 1) 0 (1+ len)) (aref grid i j)))
-      (format t "~%"))))
+(defun grid-print (grid &key key replace (test #'eql))
+  (flet ((convert (x)
+           (when key (setf x (funcall key x)))
+           (when replace
+             (setf x (or (cdr (assoc x replace :test test)) x)))
+           (princ-to-string x)))
+    (let ((len (nth-value 2
+                          (utils:argmax grid :key (lambda (x)
+                                                    (length (convert x)))))))
+      (loop :for i :below (grid-height grid) :do
+        (loop :for j :below (grid-width grid) :do
+          (format t "~vA" (if (<= len 1) 0 (1+ len)) (convert (aref grid i j))))
+        (format t "~%")))))
 
 (defun grid-rotate (grid &key ccw)
   "Rotates a square GRID clockwise, or counter-clockwise if CCW is
@@ -81,14 +113,14 @@ The grid is modified. An error is signaled if GRID is not a square."
           :do (loop :for j :from i :below aux-1
                     :for aux-2 = (- height j 1)
                     :do (if ccw
-                            (rotatef (aref grid i j)
-                                     (aref grid j aux-1)
-                                     (aref grid aux-1 aux-2)
-                                     (aref grid aux-2 i))
-                            (rotatef (aref grid i j)
-                                     (aref grid aux-2 i)
-                                     (aref grid aux-1 aux-2)
-                                     (aref grid j aux-1)))))
+                            (rotatef (grid-at (list i j) grid)
+                                     (grid-at (list j aux-1) grid)
+                                     (grid-at (list aux-1 aux-2) grid)
+                                     (grid-at (list aux-2 i) grid))
+                            (rotatef (grid-at (list i j) grid)
+                                     (grid-at (list aux-2 i) grid)
+                                     (grid-at (list aux-1 aux-2) grid)
+                                     (grid-at (list j aux-1) grid)))))
     grid))
 
 (defun %grid-torus-wrap (pos grid)

@@ -29,7 +29,7 @@ FROM and IN are strings, that will be upcased."
       (do-external-symbols (s (normalize-personal-package from))
         (export s package)))))
 
-(defmacro defpackage-conduit (common from-list &optional local-nicknames)
+(defmacro defpackage-conduit (common from-list &rest args)
   (let* ((common-pack (normalize-personal-package common))
          (from-list-pack (mapcar (lambda (pack)
                                    (if (string= "" pack)
@@ -46,8 +46,7 @@ FROM and IN are strings, that will be upcased."
                                    (do-external-symbols (s pack acc)
                                      (push (symbol-name s) acc)))
                   :nconc symbols))
-         ,@(when local-nicknames
-             `((:local-nicknames ,@local-nicknames)))))))
+         ,@args))))
 
 (defpackage #:org.numbra.perso.utils
   (:use #:cl)
@@ -55,6 +54,7 @@ FROM and IN are strings, that will be upcased."
    #:with-gensyms
    #:do-array
    #:do-line
+   #:do-line*
    #:do-hash
    #:do-hashkeys
    #:do-hashvalues
@@ -196,6 +196,7 @@ FROM and IN are strings, that will be upcased."
    #:grid-pos-in-direction
    #:grid-valid-pos-p
    #:grid-opposite-direction
+   #:grid-at
    #:grid-height
    #:grid-width
    #:grid-rotate
@@ -206,7 +207,7 @@ FROM and IN are strings, that will be upcased."
    #:grid-area-lattice
    #:grid-apply-as-sequence))
 
-(defpackage-conduit ".DS" ("point"
+(defpackage-conduit "ds" ("point"
                            "heap"
                            "ht"
                            "qtree"
@@ -214,9 +215,9 @@ FROM and IN are strings, that will be upcased."
                            "uf"
                            "interval"
                            "grid")
-  ((#:utils #:org.numbra.perso.utils)))
+  (:local-nicknames (#:utils #:org.numbra.perso.utils)))
 
-(defpackage #:org.numbra.perso.algo
+(defpackage #:org.numbra.perso.algo.graphs
   (:use #:cl #:org.numbra.perso.ds #:org.numbra.perso.utils)
   (:export
    ;; Graphs
@@ -226,12 +227,19 @@ FROM and IN are strings, that will be upcased."
    #:dfs
    #:bfs
    #:shortest-path-all-to-all
+   #:find-cycle
    #:connected-components
    ;; Iteration, dynamical system, cycles
    #:find-cycle-dynamical-system
-   #:iterate-dynamical-system))
+   #:iterate-dynamical-system
+   #:topological-sort
+   #:longest-path))
 
-(defpackage-conduit "" ("utils" "io" "ds" "algo"))
+(defpackage-conduit "algo" ("graphs")
+  (:use #:org.numbra.perso.ds #:org.numbra.perso.utils))
+
+(defpackage-conduit "" ("utils" "io" "ds" "algo")
+  (:use #:org.numbra.perso.ds #:org.numbra.perso.utils))
 
 ;;;; Extra stuff
 (defpackage #:org.numbra.perso.machine
@@ -252,6 +260,6 @@ FROM and IN are strings, that will be upcased."
    #:gen-packages
    #:create-files-templates))
 
-(defpackage-conduit ".EXTRAS" ("")
-  ((#:aoc #:org.numbra.perso.aoc)
-   (#:machine #:org.numbra.perso.machine)))
+(defpackage-conduit "extras" ("")
+  (:local-nicknames (#:aoc #:org.numbra.perso.aoc)
+                    (#:machine #:org.numbra.perso.machine)))

@@ -70,6 +70,46 @@ the starting point and the ending point."
                    ,@body)))
          ,@body))))
 
+(defmacro do-line* ((x start end &key (step 1)) &body body)
+  "Iterate over the multi-dimensional line between START and END (included).
+
+X is bound to the successive positions, as a list. X is destructively
+modified at each step, and you should not modify it.
+
+This assumes that there is only one difference between START and END.
+
+STEP will be the amount by which we increase X in that direction. It can
+be given as an absolute value, the sign will be automatically changed
+depending on the values of START and END at runtime."
+  ;; Could simplify implementation using MISMATCH/NTHCDR, at the cost
+  ;; of a minor performance slowdown.
+  (with-gensyms (y rest rest-x end-val delta
+                   (gstep step) (gstart start) (gend end))
+    `(progn
+       (assert (= (length ,gstart) (length ,gend))
+               nil
+               "~A and ~A are not of the same length." ,gstart ,gend)
+       (let* ((,x (copy-seq ,gstart)))
+         (multiple-value-bind (,rest ,end-val ,delta)
+             (do ((,rest-x ,x   (cdr ,rest-x))
+                  (,y      ,gend (cdr ,y)))
+                 ((or (endp ,rest-x)
+                      (/= (car ,rest-x) (car ,y)))
+                  (values ,rest-x
+                          (car ,y)
+                          (if ,rest-x
+                              (signum (- (car ,y) (car ,rest-x)))
+                              0))))
+           (setf ,gstep (* ,gstep ,delta))
+           (if ,rest
+               (do ()
+                   ((if (= ,delta 1)
+                        (< ,end-val (car ,rest))
+                        (< (car ,rest) ,end-val)))
+                 ,@body
+                 (incf (car ,rest) ,gstep))
+               ,@body))))))
+
 (defmacro do-hash ((x v hash-table) &body body)
   `(block nil
      (maphash (lambda (,x ,v)
@@ -101,6 +141,7 @@ the starting point and the ending point."
     (with-gensyms ((gstart start) (gend end) (gstep step))
       `(loop :for ,variable :from ,gstart :below ,gend :by ,gstep
              :do ,(if vars-ranges
-                      `(dotimes-product (,(first vars-ranges) ,@(rest vars-ranges))
+                      `(dotimes-product (,(first vars-ranges)
+                                         ,@(rest vars-ranges))
                          ,@body)
                       (cons 'progn body))))))
