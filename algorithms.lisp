@@ -1,4 +1,4 @@
-;;; numbra:
+;; numbra:
 ;;; Algorithms
 
 (in-package #:org.numbra.perso.algo.graphs)
@@ -547,3 +547,78 @@ and RANDOM."
                                0))))))
       (map nil #'longest-ending-at order)
       (values distances inc-edges))))
+
+
+;;;; Cuts and Flows
+
+(defun sr-min-cut (vertices edges-table)
+  (let* ((keys (make-hash-table :test (hash-table-test vertices)
+                                :size (hash-table-size vertices)))
+         (prio-queue (make-heap #'> :key (lambda (x) (gethash x keys)))))
+    (do-hashkeys (u vertices)
+      (setf (gethash u keys) 0)
+      (heap-push u prio-queue))
+    (let (s r)
+      (loop :while (heap-peek prio-queue)
+            :for u = (heap-pop prio-queue)
+            :do (shiftf s r u)
+                (dolist (v-cost (gethash u edges-table))
+                  (destructuring-bind (v . cost) v-cost
+                    (when (heap-contains-p v prio-queue)
+                      (incf (gethash v keys) cost)
+                      (heap-push v prio-queue))))
+            :finally (remhash r keys)
+                     (return (values (cons keys
+                                           (ht-from-sequence (list r)))
+                                     s
+                                     r))))))
+
+;;; TODO: need to track of which vertices have been merged
+(defun merge-vertices (vertices edges-table s r)
+  ;; New edges: merge the two sets of edges, adding the costs if
+  ;; needed
+  (setf (gethash s edges-table)
+        (ht-merge-with-binop #'+
+                             (gethash s edges-table)
+                             (gethash r edges-table)))
+  ;; Remove self loops
+  (remhash s (gethash s edges-table))
+  (remhash r (gethash s edges-table))
+  ;; Remove references to r everywhere
+  (remhash r vertices)
+  (remhash r edges-table)
+  (do-hashvalues (edges edges-table)    ; out-edge from some vertex v
+    (when (gethash r edges) ; if edge v->r, need to change it to go to s
+      (incf (gethash s edges 0) (gethash r edges))
+      (remhash r edges))))
+
+(defun %minimum-cut (vertices edges-table)
+  (if (= 2 (hash-table-count vertices))
+      (let (res)
+        (do-hashkeys (v vertices)
+          (push (ht-from-sequence (list v)) res))
+        res)
+      (destructuring-bind (cut s r)
+          (sr-min-cut vertices edges-table)
+        (merge-vertices vertices edges-table s r)
+        (let ((new-cut (%minimum-cut vertices edges-table)))
+          (if (< (cut-weight new-cut) (cut-weight cut))
+              new-cut
+              cut)))))
+
+(defun minimum-cut (vertices edges &key (test 'eql))
+  "Computes a minimum cut in the UNDIRECTED graph given by edges.
+
+It is the caller responsibility to make sure that EDGES is not
+directed.
+
+VERTICES is a hash-table or a sequence of vertices."
+  (let ((edges-table (make-hash-table :test test
+                                      :size (hash-table-size vertices)))
+        (vertices (deepcopy vertices)))
+    (do-hashkeys (v vertices)
+      (let ((table (make-hash-table :test test)))
+        (dolist (edge (funcall edges v))
+          (setf (gethash (car edge) table) (cdr edge)))
+        (setf (gethash v edges-table) table)))
+    (%minimum-cut vertices edges-table)))

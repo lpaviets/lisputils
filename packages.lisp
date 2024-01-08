@@ -119,7 +119,8 @@ FROM and IN are strings, that will be upcased."
    #:heap-peek
    #:heap-update
    #:heap-flush
-   #:heap-contents))
+   #:heap-contents
+   #:heap-contains-p))
 
 (defpackage #:org.numbra.perso.ds.ht
   (:use #:cl)
@@ -131,6 +132,7 @@ FROM and IN are strings, that will be upcased."
    #:ht-from-sequence
    #:ht-pop
    #:ht-merge
+   #:ht-merge-with-binop
    #:ht-from-plist))
 
 (defpackage #:org.numbra.perso.ds.qtree

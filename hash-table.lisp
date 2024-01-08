@@ -61,6 +61,31 @@ the same value, as tested by VALUE-TEST."
                             x prev v)))))
         :finally (return new-table)))
 
+(defun ht-merge-with-binop (binop hash-table &rest hash-tables)
+  "Returns a fresh hash-table containing all the keys of
+all the HASH-TABLES given as arguments, including HASH-TABLE. All the
+arguments must have the same hash-table-test.
+
+If a key appears in two or more hash-tables, its value is obtained by
+calling the binary function BINOP on the currently computed value and
+the new value."
+
+  (loop :with new-table = (make-hash-table :test (hash-table-test hash-table)
+                                           :size (hash-table-size hash-table))
+        :with test = (hash-table-test new-table)
+        :for table :in (cons hash-table hash-tables)
+        :unless (eq test (hash-table-test table))
+          :do (error "Hash-tables ~A, ~A have different HASH-TABLE-TEST"
+                     hash-table table)
+        :do (utils:do-hash (x v table)
+              (multiple-value-bind (prev found)
+                  (gethash x new-table)
+                (if found
+                    (setf (gethash x new-table)
+                          (funcall binop prev v))
+                    (setf (gethash x new-table) v))))
+        :finally (return new-table)))
+
 (defun ht-count (item table &key key (test 'eql) value)
   "Return the number of entries in TABLE satisfying a test with ITEM,
 which defaults to EQL.

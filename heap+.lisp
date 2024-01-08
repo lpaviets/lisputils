@@ -91,6 +91,11 @@
 
 ;;; ----------------------------------------------------
 
+(defun heap-contains-p (x heap)
+  (if (gethash x (heap-elts-table heap)) t nil))
+
+;;; ----------------------------------------------------
+
 (defun heap-push (x heap)
   "Insert a new element onto the heap."
   (declare (optimize (speed 3) (safety 0) (debug 0)))
