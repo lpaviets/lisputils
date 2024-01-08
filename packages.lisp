@@ -135,6 +135,11 @@ FROM and IN are strings, that will be upcased."
    #:ht-merge-with-binop
    #:ht-from-plist))
 
+(defpackage #:org.numbra.perso.ds.hset
+  (:use #:cl)
+  (:local-nicknames (#:utils #:org.numbra.perso.utils))
+  (:export))
+
 (defpackage #:org.numbra.perso.ds.qtree
   (:use #:cl #:org.numbra.perso.ds.point)
   (:local-nicknames (#:utils #:org.numbra.perso.utils))
