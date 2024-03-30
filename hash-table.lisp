@@ -6,24 +6,28 @@
 (defun ht-create (&rest args)
   "Create a hash-table using ARGS as keys and values.
 
-If ARGS is of even length, the even-indexed elements are used as keys,
-and the odd-indexed ones as values, alternatively.
+If ARGS is of even length, the even-indexed elements are used as keys, and the
+odd-indexed ones as values, alternatively.
 
-If ARGS is of odd length, its first element is used as the :TEST argument
-to MAKE-HASH-TABLE.
+If ARGS is of odd length, its first element is used as the :TEST argument to
+MAKE-HASH-TABLE.
 
-See also `ht-from-plist' for another way to create hash-tables from a
-variable number of pairs."
+See also `ht-from-plist' for another way to create hash-tables from a variable
+number of pairs."
   (let* ((test (when (oddp (length args)) (pop args)))
          (table (make-hash-table :test (or test 'eql))))
     (loop :for (key val) :on args :by #'cddr
           :do (setf (gethash key table) val))
     table))
 
-(defun ht-pop (table)
-  "Return a random key from TABLE, and remove it from TABLE. As a
-secondary return value, also return the value associated to it in
-TABLE."
+(defun ht-peek (table)
+  "Return a random key from TABLE. As a secondary value, also return the value
+associated to it in TABLE.
+
+If TABLE is empty, errors instead."
+  (assert (plusp (hash-table-count table))
+          ()
+          "Cannot peek in empty table ~A" table)
   (let (rk rv)
     (block nil
       ;; Weird hack: we access any element using maphash but we stop
@@ -34,8 +38,17 @@ TABLE."
                        rv v))
                table)
       (return))
-    (remhash rk table)
     (values rk rv)))
+
+(defun ht-pop (table)
+  "Return a random key from TABLE, and remove it from TABLE. As a
+secondary return value, also return the value associated to it in TABLE.
+
+If TABLE is empty, errors instead."
+  (multiple-value-bind (k v)
+      (ht-peek table)
+    (remhash k table)
+    (values k v)))
 
 (defun ht-merge (value-test hash-table &rest hash-tables)
   "Returns a fresh hash-table containing all the keys of
@@ -164,3 +177,17 @@ variable number of pairs."
         :for (k v) :on list :by #'cddr
         :do (setf (gethash (if key (funcall key k) k) table) v)
         :finally (return table)))
+
+
+(defun ht-to-plist (table)
+  (let ((plist nil))
+    (utils:do-hash (x v table)
+      (push v plist)
+      (push x plist))
+    plist))
+
+(defun ht-to-list (table)
+  (let ((list nil))
+    (utils:do-hashkeys (x table)
+      (push x list))
+    list))

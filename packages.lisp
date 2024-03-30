@@ -59,7 +59,10 @@ FROM and IN are strings, that will be upcased."
    #:do-hashkeys
    #:do-hashvalues
    #:dotimes-product
+   #:gethash-rec
    #:flip
+   #:factorial
+   #:binomial
    #:range
    #:lazy-range
    #:manhattan-distance
@@ -130,10 +133,13 @@ FROM and IN are strings, that will be upcased."
    #:ht-count-if
    #:ht-count
    #:ht-from-sequence
+   #:ht-peek
    #:ht-pop
    #:ht-merge
    #:ht-merge-with-binop
-   #:ht-from-plist))
+   #:ht-from-plist
+   #:ht-to-plist
+   #:ht-to-list))
 
 (defpackage #:org.numbra.perso.ds.hset
   (:use #:cl)
@@ -215,16 +221,16 @@ FROM and IN are strings, that will be upcased."
    #:grid-apply-as-sequence))
 
 (defpackage-conduit "ds" ("point"
-                           "heap"
-                           "ht"
-                           "qtree"
-                           "queue"
-                           "uf"
-                           "interval"
-                           "grid")
+                          "heap"
+                          "ht"
+                          "qtree"
+                          "queue"
+                          "uf"
+                          "interval"
+                          "grid")
   (:local-nicknames (#:utils #:org.numbra.perso.utils)))
 
-(defpackage #:org.numbra.perso.algo.graphs
+(defpackage #:org.numbra.perso.algo.graphs.traversals
   (:use #:cl #:org.numbra.perso.ds #:org.numbra.perso.utils)
   (:export
    ;; Graphs
@@ -236,13 +242,36 @@ FROM and IN are strings, that will be upcased."
    #:shortest-path-all-to-all
    #:find-cycle
    #:connected-components
-   ;; Iteration, dynamical system, cycles
-   #:find-cycle-dynamical-system
-   #:iterate-dynamical-system
    #:topological-sort
    #:longest-path))
 
-(defpackage-conduit "algo" ("graphs")
+(defpackage #:org.numbra.perso.algo.graphs.flows
+  (:use #:cl #:org.numbra.perso.ds
+        #:org.numbra.perso.utils
+        #:org.numbra.perso.algo.graphs.traversals)
+  (:export
+   #:minimum-cut
+   #:max-flow))
+
+(defpackage-conduit "algo.graphs" ("traversals"
+                                   "flows")
+  (:use #:org.numbra.perso.ds #:org.numbra.perso.utils)
+  (:export
+
+   #:make-random-graph
+   #:make-graph-cycle
+   #:make-graph-path
+   #:make-graph-complete
+   #:make-graph-complete-bipartite
+   #:graph-bipartite))
+
+(defpackage #:org.numbra.perso.algo.dynsys
+  (:use #:cl #:org.numbra.perso.ds #:org.numbra.perso.utils)
+  (:export
+   #:find-cycle-dynamical-system
+   #:iterate-dynamical-system))
+
+(defpackage-conduit "algo" ("graphs" "dynsys")
   (:use #:org.numbra.perso.ds #:org.numbra.perso.utils))
 
 (defpackage-conduit "" ("utils" "io" "ds" "algo")

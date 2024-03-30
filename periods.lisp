@@ -1,4 +1,4 @@
-(in-package #:org.numbra.perso.algo)
+(in-package #:org.numbra.perso.algo.dynsys)
 
 (defun find-cycle-dynamical-system (start function &key (test 'eql) key (size 1000))
   "Find the least K and N such that

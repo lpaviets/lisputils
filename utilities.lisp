@@ -3,6 +3,24 @@
 
 (in-package #:org.numbra.perso.utils)
 
+(defun gethash-rec (table &rest keys)
+  (flet ((next (table key)
+           (multiple-value-bind (next-table foundp)
+               (gethash key table)
+             (if foundp
+                 next-table
+                 (return-from gethash-rec nil)))))
+    (reduce #'next keys :initial-value table)))
+
+;; (defun (setf gethash-rec) (val table &rest keys)
+;;   (flet ((next (table key)
+;;            (multiple-value-bind (next-table foundp)
+;;                (gethash key table)
+;;              (if foundp
+;;                  next-table
+;;                  (return-from gethash-rec nil)))))
+;;     (reduce #'next keys :initial-value table)))
+
 (defun flip (x y &optional (comp 'equal) (keep-others t))
   "Return a function of one argument which swaps X and Y
 If KEEP-OTHERS is non-NIL, this function acts like `identity' on other elements
@@ -13,6 +31,25 @@ Otherwise, elements that are not X nor Y are mapped to Y"
       ((funcall comp y z) x)
       (keep-others z)
       (t y))))
+
+(defun factorial (n)
+  (assert (<= 0 n))
+  (loop :with i = 1
+        :for k :from 2 :to n
+        :do (setf i (* i k))
+        :finally (return i)))
+
+(defun binomial (k n)
+  (assert (<= 0 k))
+  (assert (<= 0 n))
+  (if (< n k)
+      0
+      (let ((res 1))
+        (loop :for i :from 1 :to (min k (- n k))
+              :do (setf res (* res
+                               (/ (+ n 1 (- i))
+                                  i))))
+        res)))
 
 (defun range (m &optional n (step 1))
   (assert (not (zerop step)) () "STEP cannot be 0")
