@@ -253,17 +253,25 @@ FROM and IN are strings, that will be upcased."
    #:minimum-cut
    #:max-flow))
 
+(defpackage #:org.numbra.perso.algo.graphs.structure
+  (:use #:cl
+        #:org.numbra.perso.ds
+        #:org.numbra.perso.utils
+        #:org.numbra.perso.algo.graphs.traversals)
+  (:export
+   #:graph-bipartite
+   #:graph-induced))
+
 (defpackage-conduit "algo.graphs" ("traversals"
-                                   "flows")
+                                   "flows"
+                                   "structure")
   (:use #:org.numbra.perso.ds #:org.numbra.perso.utils)
   (:export
-
    #:make-random-graph
    #:make-graph-cycle
    #:make-graph-path
    #:make-graph-complete
-   #:make-graph-complete-bipartite
-   #:graph-bipartite))
+   #:make-graph-complete-bipartite))
 
 (defpackage #:org.numbra.perso.algo.dynsys
   (:use #:cl #:org.numbra.perso.ds #:org.numbra.perso.utils)

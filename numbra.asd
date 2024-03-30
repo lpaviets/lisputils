@@ -22,6 +22,7 @@
                (:file "union-find")
                (:file "graph-traversals")
                (:file "graph-basics")
+               (:file "graph-structure")
                (:file "flows")
                (:file "grids")
                (:file "periods")

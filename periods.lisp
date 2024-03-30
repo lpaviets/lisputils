@@ -34,6 +34,9 @@ completely unknown a priori."
           :do (return (values (- i foundp) foundp step->val))
         :do (setf (gethash keyed-obj cache) i)))
 
+;; TODO: Floyd algorithm, see https://en.wikipedia.org/wiki/Cycle_detection
+
+
 (defun iterate-dynamical-system (start function n &key (test 'eql) (size (isqrt n)))
   "Returns the N-th iterate of FUNCTION on input START.
 
