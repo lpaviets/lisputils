@@ -82,6 +82,13 @@ FROM and IN are strings, that will be upcased."
    #:lexicographic<
    #:group-by))
 
+(defpackage #:org.numbra.perso.bits
+  (:use #:cl)
+  (:local-nicknames (#:utils #:org.numbra.perso.utils))
+  (:export
+   #:match-bits-p
+   #:with-match-bits))
+
 (defpackage #:org.numbra.perso.io
   (:use #:cl)
   (:export

@@ -6,7 +6,7 @@
   :license  "Specify license here"
   :version "0.0.1"
   :serial t
-  :depends-on (#:cl-ppcre #:heap)
+  :depends-on (#:cl-ppcre #:heap #:trivia)
   :components ((:file "packages")
                (:file "macros")
                (:file "point")
@@ -14,6 +14,7 @@
                (:file "heap+")
                (:file "utilities")
                (:file "subsets")
+               (:file "bits")
                (:file "queue")
                (:file "hash-table")
                (:file "hset")
