@@ -78,12 +78,15 @@ already present"
   (%uf-union (uf-find partition x) (uf-find partition y)))
 
 ;; False ???
-#|(equivalence-classes (range 10) '((1 . 3)
-(1 . 5)
-(5 . 7)
-(8 . 9)
-(4 . 6)
-(9 . 6)))|#
+#|
+(equivalence-classes (range 10)
+                     '((1 . 3)
+                       (1 . 5)
+                       (5 . 7)
+                       (8 . 9)
+                       (4 . 6)
+                       (9 . 6)))
+|#
 (defun equivalence-classes (items base &key (test #'eql))
   "Compute the reflexive and transitive closure of BASE in
 ITEMS x ITEMS.

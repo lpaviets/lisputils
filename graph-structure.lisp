@@ -49,6 +49,9 @@ VERTICES are compared using TEST."
 ;;
 ;; Implementation in Python and blog posts about it:
 ;; https://blog.scientific-python.org/posts/networkx/vf2pp/
+;;
+;; Actual implementation is here
+;; https://github.com/networkx/networkx/blob/main/networkx/algorithms/isomorphism/vf2pp.py
 
 ;; Idea: construct a /mapping/ step by step:
 ;; - VF2(mapping m){
@@ -71,3 +74,52 @@ VERTICES are compared using TEST."
 ;; Hence:
 ;; def VF2Order
 ;; def VF2ProcessLevel
+
+(defun in-mapping (node mapping)
+  (assoc node mapping))
+
+(defun in-reverse-mapping (node mapping)
+  (rassoc node mapping))
+
+(defun graph-edges (graph node)
+  (declare (ignore graph node)))
+
+(defun graph-vertices (graph)
+  (declare (ignore graph)))
+
+(defun compute-t-i (graph-1 graph-2 mapping)
+  (let* ((t-1 (loop :for node :in mapping
+                    :for nbr :in (graph-edges graph-1 (car node))
+                    :unless (in-mapping (car nbr) mapping)
+                      :collect nbr))
+         (t-2 (loop :for node :in mapping
+                    :for nbr :in (graph-edges graph-2 (cdr node))
+                    :unless (in-reverse-mapping (car nbr) mapping)
+                      :collect nbr))
+         (t-1-out (loop :for v :in (graph-vertices graph-1)
+                        :unless (or (in-mapping v mapping)
+                                    (member v t-1))
+                          :collect v))
+         (t-2-out (loop :for v :in (graph-vertices graph-2)
+                        :unless (or (in-reverse-mapping v mapping)
+                                    (member v t-2))
+                          :collect v)))
+    (values t-1 t-2 t-1-out t-2-out)))
+
+(defun update-t-in-out (graph-1 graph-2 t-1 t-2 t-1-out t-2-out v1 v2 mapping)
+  (let ((uncovered-1 (loop :for nbr :in (graph-edges graph-1 v1)
+                           :unless (in-mapping nbr mapping)
+                             :collect nbr))
+        (uncovered-2 (loop :for nbr :in (graph-edges graph-2 v2)
+                           :unless (in-reverse-mapping nbr mapping)
+                             :collect nbr)))
+    (setf t-1 (delete v1 t-1)
+          t-2 (delete v2 t-2))
+    (setf t-1 (nunion t-1 uncovered-1)
+          t-2 (nunion t-2 uncovered-2))
+
+    (setf t-1-out (delete t-1-out v1)
+          t-2-out (delete t-2-out v2))
+    (setf t-1-out (nset-difference t-1-out uncovered-1)
+          t-2-out (nset-difference t-2-out uncovered-2))
+    (values t-1 t-2 t-1-out t-2-out)))

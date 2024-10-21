@@ -69,8 +69,8 @@ VERTICES is a hash-table or a sequence of vertices."
       (let ((table (make-hash-table :test test)))
         (dolist (edge (funcall edges v))
           (setf (gethash (car edge) table) (cdr edge)))
-        (setf (gethash v edges-table) table))))
-  (%minimum-cut vertices edges-table))
+        (setf (gethash v edges-table) table)))
+    (%minimum-cut vertices edges-table)))
 
 (defun max-flow (edges source target &key (test 'eql))
   "Computes the maximal flow between SOURCE and TARGET in the graph defined by
