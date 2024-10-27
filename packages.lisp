@@ -80,7 +80,9 @@ FROM and IN are strings, that will be upcased."
    #:do-subsets
    #:do-sequence-subsets
    #:lexicographic<
-   #:group-by))
+   #:group-by
+   #:*parenthesis-pairs*
+   #:compute-parenthesis))
 
 (defpackage #:org.numbra.perso.bits
   (:use #:cl)

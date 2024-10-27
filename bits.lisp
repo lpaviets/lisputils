@@ -1,6 +1,14 @@
 ;;; numbra:
 ;;; Bit manipulation
 
+;; TODO: allow the pattern to specify repetitions:
+;; "10[*]{6}" is equivalent to "10******"
+;; Might allow nesting to do complex matches:
+;; "10[*[01]{3}]{3}" would be "10[*010101]{3}" and so "10*010101*010101*010101"
+;; This allows simpler writing for matching some specific part of a long integer.
+;;
+;; Need to implement a function which does the string replacement.
+
 (in-package #:org.numbra.perso.bits)
 
 (defun validate-pattern (pattern)
@@ -8,7 +16,7 @@
     (simple-type-error () nil)
     (:no-error (spattern)
       (loop :for c :across spattern
-            :always (find c "_01*()")))))
+            :always (find c "_01*()[]{}")))))
 
 (defun normalize-pattern (pattern)
   (assert (validate-pattern pattern) nil

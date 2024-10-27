@@ -336,3 +336,67 @@ under EQUALP, regardless of KEY and TEST."
           :and :do (setf acc (list p2))
         :unless p2
           :collect acc))
+
+;;; Parenthesis and matching pairs
+(defparameter *parenthesis-pairs* '((#\( . #\))
+                                    (#\[ . #\])
+                                    (#\{ . #\})))
+
+(defun get-closing-parens (x &optional (pairs *parenthesis-pairs*))
+  (cdr (assoc x pairs)))
+
+(defun get-opening-parens (x &optional (pairs *parenthesis-pairs*))
+  (car (rassoc x pairs)))
+
+(defun is-opening-parens-p (x &optional (pairs *parenthesis-pairs*) )
+  (member x pairs :key 'car :test 'char=))
+
+(defun is-closing-parens-p (x &optional (pairs *parenthesis-pairs*) )
+  (member x pairs :key 'cdr :test 'char=))
+
+(defun compute-parenthesis (pattern &optional (pairs *parenthesis-pairs*))
+  "Returns a list of lists of the form (TYPE (START . END) (S . E), where:
+
+- TYPE is the type of opening parenthesis of the pair
+
+- START is the position of the first parenthesis in the fully unparenthesized
+  word
+
+- END the position of the corresponding closing parenthesis
+
+- S and E are the position of the same pair, but in the initial PATTERN, with
+  parenthesis still included.
+
+>>> (compute-parenthesis \"ab[c((de)f)]g{h}\")
+((#\[ (2 . 6) (2 . 11))
+ (#\( (3 . 6) (4 . 10))
+ (#\( (3 . 5) (5 . 8))
+ (#\{ (7 . 8) (13 . 15)))
+UTILS> "
+  (let ((start-parens ())
+        (res ()))
+    (loop :with pos-clean = 0
+          :for pos :from 0
+          :for c :across pattern
+          :for (last spos-clean spos) = (car start-parens)
+          :for closingp = (is-closing-parens-p c pairs)
+          :do (cond
+                ((is-opening-parens-p c pairs)
+                 (push (list c pos-clean pos) start-parens))
+                ((and closingp (not (characterp last)))
+                 (error "Pattern ~A is not balanced: ~C in position ~A has no opening parenthesis"
+                        pattern c pos))
+                (closingp
+                 (if (char= (get-opening-parens c pairs) last)
+                     (progn
+                       (push (list last (cons spos-clean pos-clean) (cons spos pos))
+                             res)
+                       (pop start-parens))
+                     (error "Pattern ~A is not balanced: ~C in position ~A closes a ~C"
+                            pattern c pos last)))
+                (t (incf pos-clean))))
+    (assert (null start-parens)
+            ()
+            "Pattern ~A is not balanced: some opening parenthesis were not closed"
+            pattern)
+    (stable-sort res '< :key 'caadr)))
