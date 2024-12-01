@@ -49,10 +49,10 @@
                               :if-does-not-exist :create)
                (format s "(in-package #:~(~A~))~%~%"
                        (year-day-to-package year day))
-               (format s "(defparameter *input* \"input\")~%")
-               (format s "(defparameter *test* \"test\")~%~%")
-               (format s "(defun answer-ex-~a-1 ())~%~%" day)
-               (format s "(defun answer-ex-~a-2 ())~%~%" day))))
+               (format s "(defparameter *input* #P\"input\")~%")
+               (format s "(defparameter *test* #P\"test\")~%~%")
+               (format s "(defun answer-ex-~a-1 (file))~%~%" day)
+               (format s "(defun answer-ex-~a-2 (file))~%~%" day))))
 
 
 (defun create-file-packages (year)
