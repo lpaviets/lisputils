@@ -230,7 +230,8 @@ between them"
                            (test 'eql)
                            target
                            (target-test test)
-                           random)
+                           random
+                           multi-sources)
   "Depth-First-Search of the graph determined by EDGES.
 
 Returns as a third value a hash-table containing the parent of each
@@ -262,10 +263,12 @@ RANDOM determines whether the edges are searched in a deterministic
 way or not. If NIL, the outgoing edges from a vertex are visited in
 the order given by EDGES. If T, those edges are randomly shuffled.
 Otherwise, RANDOM should be a function of 3 arguments, the current
-vertex, its parent, and the list of EDGES."
+vertex, its parent, and the list of EDGES.
+
+If MULTI-SOURCES is non-NIL, SOURCE is then a list of sources."
   (let ((parents (make-hash-table :test test)))
     (setf (gethash source parents) nil)
-    (%dfs edges (list (list source))
+    (%dfs edges (if multi-sources (mapcar 'list source) (list (list source)))
           :at-vertex at-vertex
           :at-vertex-exit at-vertex-exit
           :test test
@@ -451,7 +454,7 @@ which see."
       ;; Only reaches this if we didn't find any cycle
       nil)))
 
-(defun topological-sort (edges source &key (test 'eql) random)
+(defun topological-sort (edges source &key (test 'eql) random multi-sources)
   "Computes a topological sort of the graph given by EDGES, starting
 from the vertex SOURCE.
 
@@ -463,8 +466,8 @@ vertex, and in particular, is the CAR of the returned list).
 
 - a hash-table of parents, as computed by a DFS.
 
-EDGES, SOURCE, TEST and RANDOM have the same meaning than in `dfs' or
-`bfs', which see."
+EDGES, SOURCE, MUTLI-SOUCES, TEST and RANDOM have the same meaning than in
+`dfs'."
 
   (let ((colors  (make-hash-table :test test))
         (sort nil))
@@ -485,7 +488,8 @@ EDGES, SOURCE, TEST and RANDOM have the same meaning than in `dfs' or
                                        :at-vertex #'mark-enter
                                        :at-vertex-exit #'mark-exit
                                        :test test
-                                       :random random))))
+                                       :random random
+                                       :multi-sources multi-sources))))
         (values sort parents)))))
 
 (defun out-to-in-edges (vertices edges &key (test 'eql))
