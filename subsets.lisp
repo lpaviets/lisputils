@@ -3,39 +3,38 @@
 
 (in-package #:org.numbra.perso.utils)
 
-(defun %number-to-subset-string (n seq)
-  (let ((res (make-string (logcount n))))
-    (loop :with j = 0
-          :for i :below (integer-length n)
-          :if (logbitp i n)
-            :do (setf (char res j) (char seq i))
-                (incf j))
-    res))
+(defun %number-to-subset-string (n seq storage)
+  (loop :with j = 0
+        :for i :below (integer-length n)
+        :if (logbitp i n)
+          :do (setf (char storage j) (char seq i))
+              (incf j))
+  storage)
 
-(defun %number-to-subset-vector (n seq)
-  (let ((res (make-array (logcount n))))
-    (loop :with j = 0
-          :for i :below (integer-length n)
-          :if (logbitp i n)
-            :do (setf (aref res j) (aref seq i))
-                (incf j))
-    res))
+(defun %number-to-subset-vector (n seq storage)
+  (loop :with j = 0
+        :for i :below (integer-length n)
+        :if (logbitp i n)
+          :do (setf (aref storage j) (aref seq i))
+              (incf j))
+  storage)
 
-(defun %number-to-subset-list (n seq)
-  (do* ((i 0 (1+ i))
-        (list seq (cdr list))
-        (x (car seq) (car list))
-        (res nil))
-       ((endp list) (nreverse res))
-    (when (logbitp i n)
-      (push x res))))
+(defun %number-to-subset-list (n seq storage)
+  (let ((res storage))
+    (do* ((i 0 (1+ i))
+          (list seq (cdr list))
+          (x (car seq) (car list)))
+         ((endp list) res)
+      (when (logbitp i n)
+        (setf (car storage) x)
+        (setf storage (cdr storage))))))
 
 
-(defun number-to-subset-sequence (n seq)
+(defun number-to-subset-sequence (n seq storage)
   (etypecase seq
-    (list (%number-to-subset-list n seq))
-    (string (%number-to-subset-string n seq))
-    (vector (%number-to-subset-vector n seq))))
+    (list (%number-to-subset-list n seq storage))
+    (string (%number-to-subset-string n seq storage))
+    (vector (%number-to-subset-vector n seq storage))))
 
 (defun number-to-subset-number (n-subset n-source)
   (let ((res 0))
@@ -79,16 +78,31 @@ https://stackoverflow.com/questions/15932237/iterating-over-all-subsets-of-a-giv
                                               (* 4 ,a)))))
          ,result))))
 
-(defmacro do-sequence-subsets ((x (k sequence &optional result)) &body body)
+(defmacro do-sequence-subsets ((x (k sequence &optional result) &optional type) &body body)
   "Simple wrapper around `DO-SUBSETS', which see.
 
-SEQUENCE is the set from which we take subsets."
+SEQUENCE is the set from which we take subsets.
 
-  (with-gensyms ((gseq sequence) len n fun)
-    `(let ((,len (length ,gseq))
-           (,fun (lambda (,n)
-                   (number-to-subset-sequence ,n ,gseq))))
-       (do-subsets (,x (,k ,len ,result) ,fun)
+TODO: TYPE is the type of X at each iteration: by default, it has the same type
+as SEQUENCE, but can be any of STRING, VECTOR or LIST.
+
+IMPORTANT: Note that for performance reason, the subset bound to X at each
+iteration might be destructively modified in later iterations, and the caller is
+responsible for performing any desired copies."
+
+  (with-gensyms ((gk k) (gseq sequence) len n fun (gtype type) storage)
+    `(let* ((,len (length ,gseq))
+            (,gtype (or ,gtype (etypecase ,gtype
+                                 (string 'string)
+                                 (vector 'vector)
+                                 (list 'list))))
+            (,storage (ecase ,gtype
+                        (string (make-string ,gk))
+                        (vector (make-array ,gk))
+                        (list (make-list ,gk))))
+            (,fun (lambda (,n)
+                    (number-to-subset-sequence ,n ,gseq ,storage))))
+       (do-subsets (,x (,gk ,len ,result) ,fun)
          ,@body))))
 
 ;;; WIP: generate perfect hash-tables
