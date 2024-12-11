@@ -145,3 +145,13 @@ depending on the values of START and END at runtime."
                                          ,@(rest vars-ranges))
                          ,@body)
                       (cons 'progn body))))))
+
+;; TODO: difference between two possible behaviours:
+;; - Make a cache per "toplevel function call": useful to compute e.g. Fibonacci
+;; - Make a shared cache for *all* toplevel function calls
+;; (defmacro defun-memoized (name (&key cache (test 'eql)) lambda-list &body body)
+;;   (with-gensyms (memo (name-cached name))
+;;     `(defun ,name ,lambda-list
+;;        (let ((,memo (make-hash-table :test ,test)))
+;;          (labels ((,name-cached ))
+;;            (,name-cached ))))))

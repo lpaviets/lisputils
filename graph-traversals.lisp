@@ -23,19 +23,17 @@
 
 (defgeneric shortest-path (edges source target &key test)
             (:documentation "Shortest path from SOURCE to TARGET in the graph G determined
-by EDGES.
-Comparison between vertices is done using TEST"))
+by EDGES. Comparison between vertices is done using TEST"))
 
 (defmethod shortest-path ((edges function) source target &key (test 'eql))
   "EDGES is expected to be a function of one element, a vertex (of the
-same type as SOURCE and TARGET), and return a list of cons cells,
-whose car is an adjacent vertex and whose cdr is the edge's weight.
-For example:
+same type as SOURCE and TARGET), and return a list of cons cells, whose car is
+an adjacent vertex and whose cdr is the edge's weight. For example:
 (funcall EDGES SOURCE) -> ((u1 . w1) (u2 . w2)) ... (un . wn))
 where the ui's are exactly the vertices adjacent to SOURCE.
 
-TARGET can also be a function of one argument, a vertex, returning T
-if this vertex is a possible target."
+TARGET can also be a function of one argument, a vertex, returning T if this
+vertex is a possible target."
   (let  ((distance (make-hash-table :test test))
          (queue (heap:make-heap #'< :key #'cdr))
          (parent (make-hash-table :test test))
@@ -70,8 +68,8 @@ if this vertex is a possible target."
 
 (defmethod shortest-path ((edges array) (source integer) (target integer) &key (test 'eql))
   "EDGES is given as a 2D array, representing the adjacency matrix of the graph
-(aref EDGES i j) is the weight of the oriented edge between I and J
-SOURCE and TARGET are INTEGER, corresponding to valid indices of the array"
+(aref EDGES i j) is the weight of the oriented edge between I and J SOURCE and
+TARGET are INTEGER, corresponding to valid indices of the array"
   (flet ((fun-edges (vertex)
            (loop :for j :below (array-dimension edges 1)
                  :for weight = (aref edges vertex j)
@@ -83,11 +81,12 @@ SOURCE and TARGET are INTEGER, corresponding to valid indices of the array"
 ;;; Way better space-wise, not necessarily the case speed-wise
 (defmethod shortest-path-dec-key (edges source target &key (test 'eql))
   "EDGES is expected to be a function of one element, a vertex (of the
-same type as SOURCE and TARGET), and return a list of cons cells,
-whose car is an adjacent vertex and whose cdr is the edge's weight.
-For example:
-(funcall EDGES SOURCE) -> ((u1 . w1) (u2 . w2)) ... (un . wn))
-where the ui's are exactly the vertices adjacent to SOURCE."
+same type as SOURCE and TARGET), and return a list of cons cells, whose car is
+an adjacent vertex and whose cdr is the edge's weight.
+
+ For example:
+(funcall EDGES SOURCE) -> ((u1 . w1) (u2 . w2)) ... (un . wn)) where the ui's
+are exactly the vertices adjacent to SOURCE."
   (let  ((distance (make-hash-table :test test))
          (parent (make-hash-table :test test)))
     (declare (special distance))
@@ -123,9 +122,10 @@ where the ui's are exactly the vertices adjacent to SOURCE."
 (defun a-star (edges source target heuristic &key (test 'eql))
   "HEURISTIC is a function of one argument, a vertex, returning a value, ideally
 close to the distance from the vertex to TARGET.
+
 To ensure optimality of the path, it is required that HEURISTIC never
-overestimates the real distance.
-See `shortest-path-dec-key' for the other arguments."
+overestimates the real distance. See `shortest-path-dec-key' for the other
+arguments."
   (let  ((distance (make-hash-table :test test))
          (parent (make-hash-table :test test)))
     (declare (special distance))
@@ -167,9 +167,8 @@ See `shortest-path-dec-key' for the other arguments."
 
 (defun shortest-path-all-to-all (adjacency-matrix)
   "Computes the shortest path from any vertex to any other vertex
-ADJACENCY-MATRIX is a 2D array containing in position (i, j) the
-distance between the vertices i and j, or NIL if there is no edge
-between them"
+ADJACENCY-MATRIX is a 2D array containing in position (i, j) the distance
+between the vertices i and j, or NIL if there is no edge between them"
   (let* ((n (array-dimension adjacency-matrix 0))
          (matrix (deepcopy adjacency-matrix)))
     (dotimes (k n)
@@ -234,36 +233,33 @@ between them"
                            multi-sources)
   "Depth-First-Search of the graph determined by EDGES.
 
-Returns as a third value a hash-table containing the parent of each
-vertex, on the path from SOURCE to it in the DFS order. The first two
-returned values are NIL, to have a signature similar to `bfs'.
+Returns as a third value a hash-table containing the parent of each vertex, on
+the path from SOURCE to it in the DFS order. The first two returned values are
+NIL, to have a signature similar to `bfs'.
 
-EDGES is a function of one argument, a vertex, and return a list of
-cons cells
+EDGES is a function of one argument, a vertex, and return a list of cons cells
 (NEIGHBOUR . EDGE-WEIGHT).
 
 SOURCE is the initial vertex from which to perform the DFS.
 
-AT-VERTEX is a function of four argument: the vertex being visited,
-its parent, the cost of the edge used to reach it, and a hash-table of
-vertices that are already explored. It is called when first entering a
-vertex.
+AT-VERTEX is a function of four argument: the vertex being visited, its parent,
+the cost of the edge used to reach it, and a hash-table of vertices that are
+already explored. It is called when first entering a vertex.
 
-AT-VERTEX-EXIT has the same signature as AT-VERTEX. It is called when
-the vertex is done being explored. However, the second and thirs
-arguments, which are the parent and the cost of the edge, are
-meaningless here and set to NIL and 0 respectively.
+AT-VERTEX-EXIT has the same signature as AT-VERTEX. It is called when the vertex
+is done being explored. However, the second and third arguments, which are the
+parent and the cost of the edge, are meaningless here and set to NIL and 0
+respectively.
 
 TEST is a boolean function of two arguments, comparing vertices.
 
-If TARGET is non-NIL, the DFS stops after reaching a vertex equal (as
-of TARGET-TEST) to it.
+If TARGET is non-NIL, the DFS stops after reaching a vertex equal (as of
+TARGET-TEST) to it.
 
-RANDOM determines whether the edges are searched in a deterministic
-way or not. If NIL, the outgoing edges from a vertex are visited in
-the order given by EDGES. If T, those edges are randomly shuffled.
-Otherwise, RANDOM should be a function of 3 arguments, the current
-vertex, its parent, and the list of EDGES.
+RANDOM determines whether the edges are searched in a deterministic way or not.
+If NIL, the outgoing edges from a vertex are visited in the order given by
+EDGES. If T, those edges are randomly shuffled. Otherwise, RANDOM should be a
+function of 3 arguments, the current vertex, its parent, and the list of EDGES.
 
 If MULTI-SOURCES is non-NIL, SOURCE is then a list of sources."
   (let ((parents (make-hash-table :test test)))
