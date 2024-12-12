@@ -400,8 +400,8 @@ vertex to some unspecified source vertex from VERTICES."
     (loop :while (plusp (hash-table-count unexplored))
           :for x = (ht-pop unexplored)
           :collect (nth-value 1 (bfs edges x
-                                     :at-vertex (lambda (node parent cost)
-                                                  (declare (ignore parent cost))
+                                     :at-vertex (lambda (node parent cost explored)
+                                                  (declare (ignore parent cost explored))
                                                   (remhash node unexplored))
                                      :test test)))))
 

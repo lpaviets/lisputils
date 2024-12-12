@@ -280,7 +280,8 @@ FROM and IN are strings, that will be upcased."
    #:make-graph-cycle
    #:make-graph-path
    #:make-graph-complete
-   #:make-graph-complete-bipartite))
+   #:make-graph-complete-bipartite
+   #:make-graph-from-grid))
 
 (defpackage #:org.numbra.perso.algo.dynsys
   (:use #:cl #:org.numbra.perso.ds #:org.numbra.perso.utils)

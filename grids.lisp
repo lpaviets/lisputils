@@ -45,6 +45,7 @@
 ;;     (and (<= 0 (first pos) (1- (grid-height grid)))
 ;;          (<= 0 (second pos) (1- (grid-width grid))))))
 
+(declaim (inline grid-at (setf grid-at)))
 (defun grid-at (pos grid)
   (aref grid (first pos) (second pos)))
 
