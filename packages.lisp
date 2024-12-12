@@ -176,6 +176,7 @@ FROM and IN are strings, that will be upcased."
    #:queue
    #:make-queue
    #:queue-push
+   #:queue-peek
    #:queue-pop
    #:queue-to-list
    #:queue-empty-p

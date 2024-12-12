@@ -42,6 +42,10 @@
 (defun queue-empty-p (queue)
   (zerop (queue-size queue)))
 
+(defun queue-peek (queue)
+  (assert (not (queue-empty-p queue)) () "Cannot peek from an empty queue")
+  (car (queue-head queue)))
+
 (defun queue-pop (queue)
   "Pop from the front of QUEUE. Raises an error if QUEUE is empty."
   (with-accessors ((head queue-head)
@@ -49,7 +53,7 @@
       queue
     (let (return-value)
       (cond ((queue-empty-p queue) (error "Trying to pop from the empty queue ~S" queue))
-            ((null (cdr head)) ; queue of length 1
+            ((null (cdr head))          ; queue of length 1
              (setf return-value (car head)
                    head (cdr head)
                    (queue-tail queue) head))
