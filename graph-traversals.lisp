@@ -384,7 +384,7 @@ EDGES and TEST play the same role as in `BFS', which see.
 
 VERTICES is a hash-table or a sequence of vertices that are not yet
 explored. Not all vertices need to be present in this table, as long
-as they can be reached by applpying EDGES to a vertex that does belong
+as they can be reached by applying EDGES to a vertex that does belong
 to VERTICES.
 
 Each returned connected component is a hash-table, whose keys are the
@@ -404,6 +404,105 @@ vertex to some unspecified source vertex from VERTICES."
                                                   (declare (ignore parent cost explored))
                                                   (remhash node unexplored))
                                      :test test)))))
+
+;; algorithm tarjan is
+;;     input: graph G = (V, E)
+;;     output: set of strongly connected components (sets of vertices)
+
+;;     index := 0
+;;     S := empty stack
+;;     for each v in V do
+;;         if v.index is undefined then
+;;             strongconnect(v)
+
+;;     function strongconnect(v)
+;;         // Set the depth index for v to the smallest unused index
+;;         v.index := index
+;;         v.lowlink := index
+;;         index := index + 1
+;;         S.push(v)
+;;         v.onStack := true
+
+;;         // Consider successors of v
+;;         for each (v, w) in E do
+;;             if w.index is undefined then
+;;                 // Successor w has not yet been visited; recurse on it
+;;                 strongconnect(w)
+;;                 v.lowlink := min(v.lowlink, w.lowlink)
+;;             else if w.onStack then
+;;                 // Successor w is in stack S and hence in the current SCC
+;;                 // If w is not on stack, then (v, w) is an edge pointing to an SCC already found and must be ignored
+;;                 // See below regarding the next line
+;;                 v.lowlink := min(v.lowlink, w.index)
+
+;;         // If v is a root node, pop the stack and generate an SCC
+;;         if v.lowlink = v.index then
+;;             start a new strongly connected component
+;;             repeat
+;;                 w := S.pop()
+;;                 w.onStack := false
+;;                 add w to current strongly connected component
+;;             while w ≠ v
+;;             output the current strongly connected component
+
+(defun strongly-connected-components (vertices edges &key (test 'eql))
+  "Return a list of strongly connected components of a graph.
+
+As a secondary return value, returns a hash-table whose keys are all the
+vertices, and whose values are integers representing a SCC -- two vertices have
+the same value in this table if and only if they lie in the same SCC.
+
+EDGES and TEST play the same role as in `BFS', which see.
+
+VERTICES is a hash-table or a sequence of vertices that are not yet explored.
+Not all vertices need to be present in this table, as long as they can be
+reached by applying EDGES to a vertex that does belong to VERTICES.
+
+Each returned strongly connected component is a hash-table, whose keys are the
+vertices of the component"
+  (let ((index 0)
+        (stack nil)
+        (indices (make-hash-table :test test))
+        (lowlink (make-hash-table :test test))
+        (on-stack-p (make-hash-table :test test))
+        (components nil)                                ; list of SCC
+        (table-components (make-hash-table :test test)) ; secondary return value
+        (nth-scc 0))                                    ; num of current SCC
+    (labels ((scc (v)
+               (setf (gethash v indices) index
+                     (gethash v lowlink) index
+                     (gethash v on-stack-p) t)
+               (incf index)
+               (push v stack)
+               (loop :for (w . cost) :in (funcall edges v)
+                     :do (format t "Vertex ~A: index ~A, lowlink ~A~%"
+                                 w (gethash w indices) (gethash w lowlink))
+                         (cond
+                           ((not (gethash w indices))
+                            (scc w)
+                            (setf (gethash v lowlink) (min (gethash v lowlink)
+                                                           (gethash w lowlink))))
+                           ((gethash w on-stack-p)
+                            (setf (gethash v lowlink) (min (gethash v lowlink)
+                                                           (gethash w indices))))))
+               (when (= (gethash v lowlink) (gethash v indices))
+                 (let ((component (make-hash-table :test test)))
+                   (loop :for w = (pop stack)
+                         :do (setf (gethash w on-stack-p) nil)
+                             (setf (gethash w component) t)
+                             (setf (gethash w table-components) nth-scc)
+                         :until (funcall test w v))
+                   (incf nth-scc)
+                   (push component components)))))
+      (etypecase vertices
+        (hash-table (do-hashkeys (v vertices)
+                      (unless (gethash v indices)
+                        (scc v))))
+        (sequence (map nil (lambda (v)
+                             (unless (gethash v indices)
+                               (scc v)))
+                       vertices)))
+      (values components table-components))))
 
 
 ;; DOES NOT SEEM TO WORK: infinite loop, don't know why.

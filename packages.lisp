@@ -65,6 +65,7 @@ FROM and IN are strings, that will be upcased."
    #:binomial
    #:range
    #:lazy-range
+   #:cumulative
    #:manhattan-distance
    #:permutations
    #:sublists-length
@@ -220,6 +221,7 @@ FROM and IN are strings, that will be upcased."
    #:grid-valid-pos-p
    #:grid-opposite-direction
    #:grid-at
+   #:grid-find
    #:grid-height
    #:grid-width
    #:grid-rotate
@@ -252,6 +254,7 @@ FROM and IN are strings, that will be upcased."
    #:shortest-path-all-to-all
    #:find-cycle
    #:connected-components
+   #:strongly-connected-components
    #:topological-sort
    #:longest-path))
 

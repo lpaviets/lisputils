@@ -32,25 +32,6 @@ Otherwise, elements that are not X nor Y are mapped to Y"
       (keep-others z)
       (t y))))
 
-(defun factorial (n)
-  (assert (<= 0 n))
-  (loop :with i = 1
-        :for k :from 2 :to n
-        :do (setf i (* i k))
-        :finally (return i)))
-
-(defun binomial (k n)
-  (assert (<= 0 k))
-  (assert (<= 0 n))
-  (if (< n k)
-      0
-      (let ((res 1))
-        (loop :for i :from 1 :to (min k (- n k))
-              :do (setf res (* res
-                               (/ (+ n 1 (- i))
-                                  i))))
-        res)))
-
 (defun range (m &optional n (step 1))
   (assert (not (zerop step)) () "STEP cannot be 0")
   (let ((start (if n m 0))
@@ -69,6 +50,15 @@ Otherwise, elements that are not X nor Y are mapped to Y"
       (if (funcall test i end)
           default
           (prog1 i (incf i step))))))
+
+(defun cumulative (function sequence &rest args)
+  (let (running)
+    (flet ((wrapper (x y)
+             (let ((res (funcall function x y)))
+               (push res running)
+               res)))
+      (apply 'reduce #'wrapper sequence args)
+      (nreverse running))))
 
 (defun manhattan-distance (x y)
   "X and Y are lists, representing positions."
@@ -355,7 +345,7 @@ under EQUALP, regardless of KEY and TEST."
   (member x pairs :key 'cdr :test 'char=))
 
 (defun compute-parenthesis (pattern &optional (pairs *parenthesis-pairs*))
-  "Returns a list of lists of the form (TYPE (START . END) (S . E), where:
+  "Returns a list of lists of the form (TYPE (START . END) (S . E)), where:
 
 - TYPE is the type of opening parenthesis of the pair
 
@@ -372,7 +362,10 @@ under EQUALP, regardless of KEY and TEST."
  (#\( (3 . 6) (4 . 10))
  (#\( (3 . 5) (5 . 8))
  (#\{ (7 . 8) (13 . 15)))
-UTILS> "
+
+PAIRS is a list of cons cells (OP . CL) where OP and CL are characters
+corresponding to an opening and a respectively closing parenthesis. By default,
+it contains the pairs (), [], {} but any character pair can be included."
   (let ((start-parens ())
         (res ()))
     (loop :with pos-clean = 0

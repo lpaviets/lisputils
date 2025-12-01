@@ -10,16 +10,22 @@
 (defun year-day-to-package (year day)
   (symb "AOC" year "/EX" day))
 
+(defun days-per-aoc-year (year)
+  (if (<= year 2024)
+      25
+      12))
+
 (defmacro gen-packages (year)
-  (let ((list (loop :for day :from 1 :to 25
-                    :collect
-                    `(defpackage ,(year-day-to-package year day)
-                       (:use :cl #:org.numbra.perso)
-                       (:local-nicknames (#:aoc #:org.numbra.perso.aoc)
-                                         (#:m #:org.numbra.perso.machine))
-                       (:export
-                        ,(symb :answer-ex- day :-1)
-                        ,(symb :answer-ex- day :-2))))))
+  (let* ((days (days-per-aoc-year year))
+         (list (loop :for day :from 1 :to days
+                     :collect
+                     `(defpackage ,(year-day-to-package year day)
+                        (:use :cl #:org.numbra.perso)
+                        (:local-nicknames (#:aoc #:org.numbra.perso.aoc)
+                                          (#:m #:org.numbra.perso.machine))
+                        (:export
+                         ,(symb :answer-ex- day :-1)
+                         ,(symb :answer-ex- day :-2))))))
     `(progn
        ,@list)))
 
@@ -32,7 +38,7 @@
 (defun create-files-sources (year)
   (loop :initially (let ((src-dir (make-pathname :directory '(:relative "src"))))
                      (ensure-directories-exist src-dir))
-        :for day :from 1 :to 25
+        :for day :from 1 :to (days-per-aoc-year year)
         :for day-str = (ex-name day)
         :for dirname = (make-pathname :directory `(:relative "src" ,day-str))
         :for filename = (make-pathname :directory `(:relative "src" ,day-str)
@@ -92,7 +98,7 @@
               :components ((:file "packages")
                            (:module src
                             :pathname "src"
-                            :components ,(loop :for day :from 1 :to 25
+                            :components ,(loop :for day :from 1 :to (days-per-aoc-year year)
                                                :collect
                                                (funcall register-module day)))))
            s))))))

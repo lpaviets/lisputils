@@ -78,6 +78,18 @@
     (:downright :upleft)
     (:downleft  :upright)))
 
+(defun grid-find (item grid &key key (test 'eql))
+  "Returns the position as a list (I J) of the first element which is
+equal, by TEST, to item. If KEY is non-NIL, (FUNCALL KEY X) is compared
+to ITEM instead.
+
+TEST is called as (FUNCALL TEST ITEM X)."
+  (utils:do-array (i j x grid)
+    (when (funcall test
+                   item
+                   (if key (funcall key x) x))
+      (return-from grid-find (list i j)))))
+
 (defun grid-height (grid)
   (array-dimension grid 0))
 
