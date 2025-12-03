@@ -92,6 +92,12 @@ Otherwise, elements that are not X nor Y are mapped to Y"
                                 (cdr end))
                   :collect (append beg (list n) end)))))
 
+(defun integer-length-base (integer &optional (base 10))
+  (setf integer (abs integer))
+  (loop :for n = 1 :then (* n base)
+        :while (<= n integer)
+        :count 1))
+
 (defun sublists-length (list n)
   "List of all the sublists of LIST of length N"
   (cond

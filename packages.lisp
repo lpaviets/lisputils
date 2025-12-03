@@ -70,6 +70,7 @@ FROM and IN are strings, that will be upcased."
    #:concat-numbers
    #:manhattan-distance
    #:permutations
+   #:integer-length-base
    #:sublists-length
    #:array-index-row-major
    #:argmax
