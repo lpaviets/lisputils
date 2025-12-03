@@ -60,6 +60,19 @@ Otherwise, elements that are not X nor Y are mapped to Y"
       (apply 'reduce #'wrapper sequence args)
       (nreverse running))))
 
+(defun horner (coefficients x)
+  (reduce (lambda (res coeff)
+            (+ (* res x) coeff))
+          coefficients))
+
+(defun concat-numbers (numbers &key (same-length-p nil))
+  (if same-length-p
+      (horner numbers (expt 10 (integer-length-base (car numbers))))
+      (loop :for num :in numbers
+            :for pow = 1 :then (expt 10 (integer-length-base num))
+            :for res = num :then (+ (* res pow) num)
+            :finally (return res))))
+
 (defun manhattan-distance (x y)
   "X and Y are lists, representing positions."
   (loop :for i :in x

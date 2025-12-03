@@ -66,6 +66,8 @@ FROM and IN are strings, that will be upcased."
    #:range
    #:lazy-range
    #:cumulative
+   #:horner
+   #:concat-numbers
    #:manhattan-distance
    #:permutations
    #:sublists-length
