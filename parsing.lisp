@@ -59,7 +59,7 @@ line is read as (FORMAT NIL \"(~A)\" (FUNCALL PARSE <line>))"
 (defun read-array (list &key as-digits)
   "Read a 2D-array. If DIGITS is non-nil, parses elements as digits"
   (loop :with array = (make-array (list (list-length list)
-                                        (length (car list))))
+                                        (reduce 'max list :key 'length)))
         :for line :in list
         :for i :from 0 :do
           (loop :for c :across line

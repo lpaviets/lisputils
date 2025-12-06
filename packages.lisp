@@ -233,7 +233,8 @@ FROM and IN are strings, that will be upcased."
    #:grid-border-length
    #:grid-area-euclidean
    #:grid-area-lattice
-   #:grid-apply-as-sequence))
+   #:grid-apply-as-sequence
+   #:grid-transpose))
 
 (defpackage-conduit "ds" ("point"
                           "heap"

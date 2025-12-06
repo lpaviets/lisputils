@@ -238,3 +238,10 @@ then it is used as the first argument."
                                view
                                (cdr args))))))
     (apply function new-args)))
+
+(defun grid-transpose (grid)
+  (let ((dims (array-dimensions grid)))
+    (assert (= 2 (length dims)) () "A grid is supposed to be a 2D array")
+    (let ((new (make-array (reverse (array-dimensions grid)))))
+      (utils:do-array (i j x grid new)
+        (setf (aref new j i) x)))))
