@@ -218,7 +218,7 @@ which the GRID should be inserted in the arguments list.
 
 For example:
 
-(GRID-APPLY-AS-SEQUENCE #'POSITION GRID ITEM :% :TEST #'EQUAL)
+(GRID-APPLY-AS-SEQUENCE GRID #'POSITION ITEM :% :TEST #'EQUAL)
 
 is equivalent to
 
