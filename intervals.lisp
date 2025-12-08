@@ -8,8 +8,8 @@
 ;;;; for "ginterval", which should not happen.
 
 (defclass interval ()
-  ((start :initarg :start :accessor start)
-   (end :initarg :end :accessor end)
+  ((start :initarg :start :accessor start :type real)
+   (end :initarg :end :accessor end :type real)
    (includedp :initarg :includedp :reader includedp
               :documentation "A cons cell (A . B) where A, B are either T or NIL.
 If A (resp. B) is T, then START (resp. END) is considered to be

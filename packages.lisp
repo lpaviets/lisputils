@@ -193,6 +193,7 @@ FROM and IN are strings, that will be upcased."
    #:uf-initialize
    #:uf-find
    #:uf-union
+   #:uf-representatives
    #:equivalence-classes))
 
 (defpackage #:org.numbra.perso.ds.interval
