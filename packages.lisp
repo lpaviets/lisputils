@@ -88,6 +88,11 @@ FROM and IN are strings, that will be upcased."
    #:*parenthesis-pairs*
    #:compute-parenthesis))
 
+(defpackage #:org.numbra.perso.geometry
+  (:use #:cl)
+  (:export
+   #:segment-intersect-p))
+
 (defpackage #:org.numbra.perso.bits
   (:use #:cl)
   (:local-nicknames (#:utils #:org.numbra.perso.utils))
@@ -301,7 +306,7 @@ FROM and IN are strings, that will be upcased."
 (defpackage-conduit "algo" ("graphs" "dynsys")
   (:use #:org.numbra.perso.ds #:org.numbra.perso.utils))
 
-(defpackage-conduit "" ("utils" "io" "ds" "algo")
+(defpackage-conduit "" ("utils" "io" "ds" "algo" "geometry")
   (:use #:org.numbra.perso.ds #:org.numbra.perso.utils))
 
 ;;;; Extra stuff

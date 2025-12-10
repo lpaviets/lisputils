@@ -13,6 +13,7 @@
                (:file "quad-tree")
                (:file "heap+")
                (:file "utilities")
+               (:file "geometry")
                (:file "arithmetic")
                (:file "subsets")
                (:file "bits")
