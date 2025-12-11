@@ -92,7 +92,7 @@ responsible for performing any desired copies."
 
   (with-gensyms ((gk k) (gseq sequence) len n fun (gtype type) storage)
     `(let* ((,len (length ,gseq))
-            (,gtype (or ,gtype (etypecase ,gtype
+            (,gtype (or ,gtype (etypecase ,gseq
                                  (string 'string)
                                  (vector 'vector)
                                  (list 'list))))
