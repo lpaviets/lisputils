@@ -6,10 +6,10 @@
 ;; Union-find
 (defclass uf-wrapper ()
   ((uf-item :accessor uf-item :initarg :item)
-   (uf-parent :accessor uf-parent :initarg :parent)
+   (uf-parent :accessor uf-parent)
    (uf-rank :accessor uf-rank :initform 0)
    (uf-size :accessor uf-size :initform 1)
-   (uf-children :accessor uf-children :initform nil))
+   (uf-next :accessor uf-next))
   (:documentation "Wrapper around arbitrary objects.
 Contains the slots UF-ITEM, UF-PARENT, UF-SIZE and UF-RANK, and UF-CHILDREN:
 
@@ -18,10 +18,15 @@ Contains the slots UF-ITEM, UF-PARENT, UF-SIZE and UF-RANK, and UF-CHILDREN:
 - UF-SIZE and UF-RANK are used to speed-up the data structure maintenance,
 UF-SIZE being also useful to know the size of the connected component (this
 is only valid for representatives)
-- UF-CHILDREN is the list of elements that point towards this node. This is
-useful to build the equivalence class of a given element.
+- UF-NEXT points to another element in the equivalence class of this element. This is
+useful to build the equivalence class of a given element: we guarantee that those form
+a cycle of all the elements of the equivalence class.
 
 NOTE : the rank is meaningless in the case of a union-by-size !"))
+
+(defmethod initialize-instance :after ((obj uf-wrapper) &key &allow-other-keys)
+  (setf (uf-parent obj) obj
+        (uf-next obj) obj))
 
 (defclass uf-partition ()
   ((test :reader partition-test
@@ -92,8 +97,7 @@ already present"
   (unless (eq wx (uf-parent wx))
     ;; recursive version, might require a lot of memory in theory
     (setf (uf-parent wx) (%uf-find partition (uf-parent wx)))
-    (%del-representative partition wx)
-    (push wx (uf-children (uf-parent wx))))
+    (%del-representative partition wx))
   (uf-parent wx))
 
 (defun uf-find (partition x)
@@ -111,7 +115,7 @@ already present"
       (incf (uf-rank wx)))
     (incf (uf-size wx) (uf-size wy))
     (%del-representative partition wy)
-    (push wy (uf-children wx))))
+    (rotatef (uf-next wx) (uf-next wy))))
 
 (defun %uf-union-size (partition wx wy)
   (unless (eq wx wy)
@@ -120,7 +124,7 @@ already present"
     (setf (uf-parent wy) wx)
     (incf (uf-size wx) (uf-size wy))
     (%del-representative partition wy)
-    (push wy (uf-children wx))))
+    (rotatef (uf-next wx) (uf-next wy))))
 
 (defun uf-union (partition x y)
   (let ((rep-x (uf-find partition x))
@@ -144,8 +148,9 @@ already present"
 
 (defun uf-equivalence-class-of (partition x)
   (let ((wx (uf-find partition x)))
-    (when wx
-      ())))
+    (loop :for next = (uf-next wx) :then (uf-next next)
+          :collect (uf-item next)
+          :until (eq next wx))))
 
 (defun equivalence-classes (items base &key (test #'eql))
   "Compute the reflexive and transitive closure of BASE in
